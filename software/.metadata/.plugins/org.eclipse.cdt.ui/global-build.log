@@ -1,0 +1,698 @@
+14:01:58 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:02:02 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:02:04 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+14:02:19 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:06:24 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:158:3: warning: implicit declaration of function 'usleep' [-Wimplicit-function-declaration]
+   usleep (500000);
+   ^
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 81 KBytes program size (code + initialized data).
+Info:              65447 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+14:06:32 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+14:06:40 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:20:08 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:21:16 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:22:31 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:48:50 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:158:3: warning: implicit declaration of function 'usleep' [-Wimplicit-function-declaration]
+   usleep (500000);
+   ^
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 82 KBytes program size (code + initialized data).
+Info:              65446 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+14:48:54 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+14:48:58 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:53:25 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+14:53:27 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+14:53:38 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:07:31 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/transfer.c to obj/default/usb_kb/transfer.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/transfer.o usb_kb/transfer.c
+usb_kb/transfer.c:9:1: warning: braces around scalar initializer
+ EP_RECORD dev0ep = {{ 0 }};         //Endpoint data structure for uninitialized device during enumeration
+ ^
+usb_kb/transfer.c:9:1: note: (near initialization for 'dev0ep.epAddr')
+usb_kb/transfer.c: In function 'XferInTransfer':
+usb_kb/transfer.c:195:7: warning: unused variable 'tmpbyte' [-Wunused-variable]
+  BYTE tmpbyte;
+       ^
+usb_kb/transfer.c:194:7: warning: unused variable 'i' [-Wunused-variable]
+  BYTE i;
+       ^
+usb_kb/transfer.c: In function 'USB_Task':
+usb_kb/transfer.c:258:10: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+          printf("USB_STATE DETACHED\n");
+          ^
+usb_kb/transfer.c:258:10: warning: incompatible implicit declaration of built-in function 'printf'
+usb_kb/transfer.c:258:10: note: include '<stdio.h>' or provide a declaration of 'printf'
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:07:36 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:07:42 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:09:46 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/transfer.c to obj/default/usb_kb/transfer.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/transfer.o usb_kb/transfer.c
+usb_kb/transfer.c:9:1: warning: braces around scalar initializer
+ EP_RECORD dev0ep = {{ 0 }};         //Endpoint data structure for uninitialized device during enumeration
+ ^
+usb_kb/transfer.c:9:1: note: (near initialization for 'dev0ep.epAddr')
+usb_kb/transfer.c: In function 'XferInTransfer':
+usb_kb/transfer.c:195:7: warning: unused variable 'tmpbyte' [-Wunused-variable]
+  BYTE tmpbyte;
+       ^
+usb_kb/transfer.c:194:7: warning: unused variable 'i' [-Wunused-variable]
+  BYTE i;
+       ^
+usb_kb/transfer.c: In function 'USB_Task':
+usb_kb/transfer.c:258:10: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+          printf("USB_STATE DETACHED\n");
+          ^
+usb_kb/transfer.c:258:10: warning: incompatible implicit declaration of built-in function 'printf'
+usb_kb/transfer.c:258:10: note: include '<stdio.h>' or provide a declaration of 'printf'
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:09:51 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:10:02 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:12:29 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/transfer.c to obj/default/usb_kb/transfer.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/transfer.o usb_kb/transfer.c
+usb_kb/transfer.c:9:1: warning: braces around scalar initializer
+ EP_RECORD dev0ep = {{ 0 }};         //Endpoint data structure for uninitialized device during enumeration
+ ^
+usb_kb/transfer.c:9:1: note: (near initialization for 'dev0ep.epAddr')
+usb_kb/transfer.c: In function 'XferInTransfer':
+usb_kb/transfer.c:195:7: warning: unused variable 'tmpbyte' [-Wunused-variable]
+  BYTE tmpbyte;
+       ^
+usb_kb/transfer.c:194:7: warning: unused variable 'i' [-Wunused-variable]
+  BYTE i;
+       ^
+usb_kb/transfer.c: In function 'USB_Task':
+usb_kb/transfer.c:258:10: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+          printf("USB_STATE DETACHED\n");
+          ^
+usb_kb/transfer.c:258:10: warning: incompatible implicit declaration of built-in function 'printf'
+usb_kb/transfer.c:258:10: note: include '<stdio.h>' or provide a declaration of 'printf'
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:12:34 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:12:49 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:28:32 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/MAX3421E.c to obj/default/usb_kb/MAX3421E.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/MAX3421E.o usb_kb/MAX3421E.c
+usb_kb/MAX3421E.c: In function 'MaxGpxHandler':
+usb_kb/MAX3421E.c:238:7: warning: variable 'GPINIRQ' set but not used [-Wunused-but-set-variable]
+  BYTE GPINIRQ;
+       ^
+usb_kb/MAX3421E.c: In function 'SPI_wr':
+usb_kb/MAX3421E.c:28:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+Info: Compiling usb_kb/transfer.c to obj/default/usb_kb/transfer.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/transfer.o usb_kb/transfer.c
+usb_kb/transfer.c:9:1: warning: braces around scalar initializer
+ EP_RECORD dev0ep = {{ 0 }};         //Endpoint data structure for uninitialized device during enumeration
+ ^
+usb_kb/transfer.c:9:1: note: (near initialization for 'dev0ep.epAddr')
+usb_kb/transfer.c: In function 'XferInTransfer':
+usb_kb/transfer.c:195:7: warning: unused variable 'tmpbyte' [-Wunused-variable]
+  BYTE tmpbyte;
+       ^
+usb_kb/transfer.c:194:7: warning: unused variable 'i' [-Wunused-variable]
+  BYTE i;
+       ^
+usb_kb/transfer.c: In function 'USB_Task':
+usb_kb/transfer.c:258:10: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+          printf("USB_STATE DETACHED\n");
+          ^
+usb_kb/transfer.c:258:10: warning: incompatible implicit declaration of built-in function 'printf'
+usb_kb/transfer.c:258:10: note: include '<stdio.h>' or provide a declaration of 'printf'
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:28:37 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:28:59 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:34:05 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:149:3: warning: implicit declaration of function 'usleep' [-Wimplicit-function-declaration]
+   usleep(500000);
+   ^
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Compiling usb_kb/MAX3421E.c to obj/default/usb_kb/MAX3421E.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/MAX3421E.o usb_kb/MAX3421E.c
+usb_kb/MAX3421E.c: In function 'MAXbytes_rd':
+usb_kb/MAX3421E.c:98:15: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+  read_data[0] = data;
+               ^
+usb_kb/MAX3421E.c: In function 'MaxGpxHandler':
+usb_kb/MAX3421E.c:240:7: warning: variable 'GPINIRQ' set but not used [-Wunused-but-set-variable]
+  BYTE GPINIRQ;
+       ^
+usb_kb/MAX3421E.c: In function 'SPI_wr':
+usb_kb/MAX3421E.c:28:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 82 KBytes program size (code + initialized data).
+Info:              65447 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:34:10 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:34:15 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:40:04 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:159:3: warning: implicit declaration of function 'usleep' [-Wimplicit-function-declaration]
+   usleep (500000);
+   ^
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Compiling usb_kb/MAX3421E.c to obj/default/usb_kb/MAX3421E.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/MAX3421E.o usb_kb/MAX3421E.c
+usb_kb/MAX3421E.c: In function 'MAXbytes_rd':
+usb_kb/MAX3421E.c:98:15: warning: assignment makes integer from pointer without a cast [-Wint-conversion]
+  read_data[0] = data;
+               ^
+usb_kb/MAX3421E.c: In function 'MaxGpxHandler':
+usb_kb/MAX3421E.c:240:7: warning: variable 'GPINIRQ' set but not used [-Wunused-but-set-variable]
+  BYTE GPINIRQ;
+       ^
+usb_kb/MAX3421E.c: In function 'SPI_wr':
+usb_kb/MAX3421E.c:28:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:40:08 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:40:40 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:159:3: warning: implicit declaration of function 'usleep' [-Wimplicit-function-declaration]
+   usleep (500000);
+   ^
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:40:44 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:40:47 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:41:34 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:43:17 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:46:53 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/MAX3421E.c to obj/default/usb_kb/MAX3421E.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/MAX3421E.o usb_kb/MAX3421E.c
+usb_kb/MAX3421E.c: In function 'MaxGpxHandler':
+usb_kb/MAX3421E.c:239:7: warning: variable 'GPINIRQ' set but not used [-Wunused-but-set-variable]
+  BYTE GPINIRQ;
+       ^
+usb_kb/MAX3421E.c: In function 'SPI_wr':
+usb_kb/MAX3421E.c:28:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+15:46:57 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+15:47:43 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:48:45 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling usb_kb/MAX3421E.c to obj/default/usb_kb/MAX3421E.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/MAX3421E.o usb_kb/MAX3421E.c
+usb_kb/MAX3421E.c: In function 'MaxGpxHandler':
+usb_kb/MAX3421E.c:240:7: warning: variable 'GPINIRQ' set but not used [-Wunused-but-set-variable]
+  BYTE GPINIRQ;
+       ^
+usb_kb/MAX3421E.c: In function 'SPI_wr':
+usb_kb/MAX3421E.c:28:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+16:04:42 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:04:44 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+16:04:55 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:27:03 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:27:07 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+16:27:15 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:30:32 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 83 KBytes program size (code + initialized data).
+Info:              65445 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+16:30:44 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+16:30:48 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:47:32 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+Info: Compiling main.c to obj/default/main.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
+main.c: In function 'main':
+main.c:140:7: warning: unused variable 'keycode' [-Wunused-variable]
+  WORD keycode;
+       ^
+Info: Compiling usb_kb/transfer.c to obj/default/usb_kb/transfer.o
+nios2-elf-gcc -xc -MP -MMD -c -I../usb_kb_bsp//HAL/inc -I../usb_kb_bsp/ -I../usb_kb_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/usb_kb/transfer.o usb_kb/transfer.c
+usb_kb/transfer.c:9:1: warning: braces around scalar initializer
+ EP_RECORD dev0ep = {{ 0 }};         //Endpoint data structure for uninitialized device during enumeration
+ ^
+usb_kb/transfer.c:9:1: note: (near initialization for 'dev0ep.epAddr')
+usb_kb/transfer.c: In function 'XferInTransfer':
+usb_kb/transfer.c:195:7: warning: unused variable 'tmpbyte' [-Wunused-variable]
+  BYTE tmpbyte;
+       ^
+usb_kb/transfer.c:194:7: warning: unused variable 'i' [-Wunused-variable]
+  BYTE i;
+       ^
+usb_kb/transfer.c: In function 'USB_Task':
+usb_kb/transfer.c:328:20: warning: implicit declaration of function 'printf' [-Wimplicit-function-declaration]
+                    printf ("Mfgr string(%i): %s\n", buf.iManufacturer, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
+                    ^
+usb_kb/transfer.c:328:20: warning: incompatible implicit declaration of built-in function 'printf'
+usb_kb/transfer.c:328:20: note: include '<stdio.h>' or provide a declaration of 'printf'
+usb_kb/transfer.c:335:20: warning: incompatible implicit declaration of built-in function 'printf'
+                    printf ("Product string(%i): %s\n", buf.iProduct, ConvUTF8ToStr(strDesc.bString, (strDesc.bLength>>1)-1));
+                    ^
+usb_kb/transfer.c:335:20: note: include '<stdio.h>' or provide a declaration of 'printf'
+Info: Linking usb_kb.elf
+nios2-elf-g++  -T'../usb_kb_bsp//linker.x' -msys-crt0='../usb_kb_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../usb_kb_bsp/   -Wl,-Map=usb_kb.map   -O0 -g -Wall   -mno-hw-div -mno-hw-mul -mno-hw-mulx -mgpopt=global  -o usb_kb.elf obj/default/main.o obj/default/usb_kb/HID.o obj/default/usb_kb/MAX3421E.o obj/default/usb_kb/transfer.o -lm -msys-lib=m
+nios2-elf-insert usb_kb.elf --thread_model hal --cpu_name nios2_gen2_0 --qsys true --simulation_enabled false --id 0 --sidp 0x1e8 --timestamp 1634619095 --stderr_dev jtag_uart_0 --stdin_dev jtag_uart_0 --stdout_dev jtag_uart_0 --sopc_system_name lab62_soc --quartus_project_dir "C:/intelFPGA_lite/18.0/SOC" --jdi ../..//output_files/SOC.jdi --sopcinfo C:/intelFPGA_lite/18.0/SOC/software/usb_kb_bsp/../../lab62_soc.sopcinfo
+Info: (usb_kb.elf) 82 KBytes program size (code + initialized data).
+Info:              65446 KBytes free for stack + heap.
+Info: Creating usb_kb.objdump
+nios2-elf-objdump --disassemble --syms --all-header --source usb_kb.elf >usb_kb.objdump
+[usb_kb build complete]
+16:47:37 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+16:47:44 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:54:41 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:55:25 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:55:26 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+16:55:29 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+17:57:06 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+17:57:08 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+17:57:14 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:11:55 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:11:57 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+18:12:02 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:22:18 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:22:21 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+18:22:31 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:27:42 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:27:44 **** Incremental Build of configuration Nios II for project usb_kb_bsp ****
+make all 
+[BSP build complete]
+18:27:48 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:30:50 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:35:30 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+18:42:24 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+13:17:35 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+15:46:20 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
+16:00:17 **** Incremental Build of configuration Nios II for project usb_kb ****
+make all 
+Info: Building ../usb_kb_bsp/
+C:/intelFPGA_lite/18.0/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../usb_kb_bsp/
+[BSP build complete]
+[usb_kb build complete]
