@@ -1,0 +1,15 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+

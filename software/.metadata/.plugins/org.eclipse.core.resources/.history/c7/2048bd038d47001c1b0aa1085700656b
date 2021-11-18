@@ -1,0 +1,61 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+/** vga_clear
+ * Parameters: None.
+ *
+ * Description: Clear out the memory associated with the
+ * VGA controller component.
+ *
+ * Expected behavior: Line, level, and current score are reset.
+ */
+void vga_clear() {
+	vga_ctrl->LEVEL_LINES = 0x000000;
+	vga_ctrl->SCORE = 0x000000;
+}
+
+/** test_inc_level_line_values
+ * Parameters:
+ * @step = Step increment to the memory per cycle.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases (still has alphabet), then the level increases (still has alphabet).
+ */
+void test_inc_level_line_values(alt_u8 step) {
+	vga_ctrl->LEVEL_LINES += step;
+}
+
+/** test_inc_level_line_values
+ * Parameters:
+ * @step = Step increment to the memory per cycle.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases, then the level increases.
+ */
+void test_score_values(alt_u32 new_score) {
+	vga_ctrl->SCORE = new_score;
+}
+
+int main() {
+	vga_clear();
+	while (1) {
+		test_inc_level_line_values(0xFF);
+		test_score_values(vga_ctrl->LEVEL_LINES);
+	}
+	return 0;
+}

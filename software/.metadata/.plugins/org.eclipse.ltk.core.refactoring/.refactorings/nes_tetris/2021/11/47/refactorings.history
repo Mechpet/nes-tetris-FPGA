@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename resource &apos;nes_tetris/ram.h&apos; to &apos;vga.h&apos;" description="Rename resource &apos;ram.h&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="ram.h" name="vga.h" stamp="1637139541158" updateReferences="true"/>
+</session>

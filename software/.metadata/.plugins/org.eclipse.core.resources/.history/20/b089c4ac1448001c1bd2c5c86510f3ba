@@ -1,0 +1,33 @@
+/*
+ * vga.h
+ * Based on Zuofu Cheng's text_mode_vga.h
+ *
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#ifndef VGA_H_
+#define VGA_H_
+
+#define COLUMNS_BLOCKS 10
+#define ROWS_BLOCKS 20
+
+#include <system.h>
+#include <alt_types.h>
+
+struct VGA_STRUCT {
+	alt_u32 LEVEL_LINES;
+	alt_u32 SCORE;
+	alt_u32 ROW_0;
+	alt_u32 RESERVED[1021];
+	alt_u32 PALETTE;
+};
+
+static volatile struct VGA_STRUCT *vga_ctrl = VGA_CONTROLLER_0_BASE;
+
+void vga_clear();
+void test_inc_level_line_values();
+void test_score_values(alt_u32 new_score);
+void set_palette(alt_u8 color, alt_u8 red, alt_u8 green, alt_u8 blue);
+
+#endif /* VGA_H_ */

@@ -1,0 +1,21 @@
+/*
+ * ram.h
+ * Based on Zuofu Cheng's text_mode_vga.h
+ *
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#ifndef RAM_H_
+#define RAM_H_
+
+#define COLUMNS_BLOCKS 10
+#define ROWS_BLOCKS 20
+
+#include <system.h>
+#include <alt_types.h>
+
+
+
+
+#endif /* RAM_H_ */

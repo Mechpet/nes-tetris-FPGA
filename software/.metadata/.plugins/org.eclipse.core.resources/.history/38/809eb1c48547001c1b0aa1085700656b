@@ -1,0 +1,34 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+void vga_clear() {
+	vga_ctrl->LEVEL_LINES = 0x000000;
+}
+
+/** test_inc_level_line_values
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases, then the level increases.
+ */
+void test_inc_level_line_values() {
+	vga_ctrl->LEVEL_LINES++;
+}
+
+int main() {
+	while (1) {
+		test_inc_level_line_values();
+	}
+	return 0;
+}

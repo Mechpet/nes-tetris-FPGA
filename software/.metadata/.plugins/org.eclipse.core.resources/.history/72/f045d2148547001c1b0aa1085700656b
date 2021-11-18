@@ -1,0 +1,26 @@
+/*
+ * vga.h
+ * Based on Zuofu Cheng's text_mode_vga.h
+ *
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#ifndef VGA_H_
+#define VGA_H_
+
+#define COLUMNS_BLOCKS 10
+#define ROWS_BLOCKS 20
+
+#include <system.h>
+#include <alt_types.h>
+
+struct VGA_STRUCT {
+	alt_u32 LEVEL_LINES;
+};
+
+static volatile struct VGA_STRUCT *vga_ctrl = VGA_CONTROLLER_0_BASE;
+
+void test_level_values();
+
+#endif /* VGA_H_ */

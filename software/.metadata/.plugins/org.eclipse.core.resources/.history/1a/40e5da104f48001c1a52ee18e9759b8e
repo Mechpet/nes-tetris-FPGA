@@ -1,0 +1,160 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+/** vga_clear
+ * Parameters: None.
+ *
+ * Description: Clear out the memory associated with the
+ * VGA controller component.
+ *
+ * Expected behavior: Line, level, and current score are reset.
+ */
+void vga_clear() {
+	vga_ctrl->LEVEL_LINES = 0x00000000;
+	vga_ctrl->SCORE	 	  = 0x00000000;
+	vga_ctrl->ROW_0	 	  = 0x00000000;
+	vga_ctrl->PALETTE 	  = 0x00000000;
+}
+
+/** increase_level
+ * Parameters: None.
+ *
+ * Description: Increment the current level.
+ *
+ * Expected behavior: Level increases by 1 and no hexadecimal digits are displayed on VGA.
+ */
+void increase_level() {
+	alt_u32 decimal_mask = 0xFFFF0000;
+	alt_u32 nine_mask = 0x00090000;
+	alt_u32 lines_mask 	 = 0x0000FFFF;
+	alt_u32 curr_lines   = vga_ctrl->LEVEL_LINES & lines_mask;
+
+	int zeroth_bit = 16, third_bit = 18;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1 + curr_lines);
+			break;
+		}
+	}
+}
+
+/** step_lines
+ * Parameters:
+ * @step = Number of lines to add to the current line count.
+ *
+ * Description: Step the current line count by a parameter amount.
+ *
+ * Expected behavior: Line count increases by the parameter amount and no hexadecimal digits are displayed on VGA.
+ */
+void step_lines(alt_u8 step) {
+
+}
+
+void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2) {
+	vga_ctrl->PALETTE &= 0x00000000;
+	vga_ctrl->PALETTE |= new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1;
+	printf("Palette = %x\n", vga_ctrl->PALETTE);
+}
+
+/** test_inc_level_line_values
+ * Parameters: None.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases (still has alphabet), then the level increases (still has alphabet).
+ */
+void test_inc_level_line_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+void test_inc_level_line_values2() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+/** test_inc_level_line_values
+ * Parameters:
+ * @step = Step increment to the memory per cycle.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases, then the level increases.
+ */
+void test_score_values(alt_u32 new_score) {
+	vga_ctrl->SCORE = new_score;
+}
+
+void test_row_0_values() {
+	alt_u32 random_number = 0xAAAA1111;
+	printf("Random number was %x\n", random_number);
+	vga_ctrl->ROW_0 = random_number;
+}
+
+int main() {
+	vga_clear();
+	set_palette(colors[4].red, colors[4].green, colors[4].blue, colors[2].red, colors[2].green, colors[2].blue);
+	usleep(1000);
+	alt_u32 counter = 0;
+	test_row_0_values();
+	test_score_values(0x55555555);
+	usleep(1000);
+	while (1) {
+
+		if (counter % 25 == 0) {
+			test_inc_level_line_values();
+		}
+		counter++;
+	}
+	return 0;
+}
