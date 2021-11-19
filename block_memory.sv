@@ -18,7 +18,7 @@ module block_memory ( input logic [1:0] block_template,
 							 input logic gameover,
 							 output logic [1:0] color_index);
 
-	parameter[0:79][31:0] TEMPLATE_ROM = {
+	parameter[0:63][31:0] TEMPLATE_ROM = {
 		// Code WHITE
 		32'b11110101010101010101010101010000, // 0
 		32'b11110101010101010101010101010000, // 1
@@ -100,15 +100,33 @@ module block_memory ( input logic [1:0] block_template,
 			// Override rom_addr
 			rom_addr = 3 * 16 + pixel_y;
 		end
-		else if (block_template == 4'h3) begin
-			rom_addr = 79;
+		else if (block_template == 2'b11) begin
+			rom_addr = 63;
 		end
 		else begin
 			rom_addr = block_template * 16 + pixel_y;
 		end
 		
 		rom_data = TEMPLATE_ROM[rom_addr];
-		rom_blocks = '{rom_data[31:30], rom_data[29:28], rom_data[27:26], rom_data[25:24], rom_data[23:22], rom_data[21:20], rom_data[19:18], rom_data[17:16], rom_data[15:14], rom_data[13:12], rom_data[11:10], rom_data[9:8], rom_data[7:6], rom_data[5:4], rom_data[3:2], rom_data[1:0]};
-		color_index = rom_blocks[15 - pixel_x];
+		unique case (15 - pixel_x)
+			0 : color_index = rom_data[1:0];
+			1 : color_index = rom_data[3:2];
+			2 : color_index = rom_data[5:4];
+			3 : color_index = rom_data[7:6];
+			4 : color_index = rom_data[9:8];
+			5 : color_index = rom_data[11:10];
+			6 : color_index = rom_data[13:12];
+			7 : color_index = rom_data[15:14];
+			8 : color_index = rom_data[17:16];
+			9 : color_index = rom_data[19:18];
+			10 : color_index = rom_data[21:20];
+			11 : color_index = rom_data[23:22];
+			12 : color_index = rom_data[25:24];
+			13 : color_index = rom_data[27:26];
+			14 : color_index = rom_data[29:28];
+			15 : color_index = rom_data[31:30];
+		endcase
+		//rom_blocks = '{rom_data[31:30], rom_data[29:28], rom_data[27:26], rom_data[25:24], rom_data[23:22], rom_data[21:20], rom_data[19:18], rom_data[17:16], rom_data[15:14], rom_data[13:12], rom_data[11:10], rom_data[9:8], rom_data[7:6], rom_data[5:4], rom_data[3:2], rom_data[1:0]};
+		//color_index = rom_blocks[15 - pixel_x];
 	end					 
 endmodule

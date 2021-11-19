@@ -23,7 +23,9 @@
 void vga_clear() {
 	vga_ctrl->LEVEL_LINES = 0x00000000;
 	vga_ctrl->SCORE	 	  = 0x00000000;
-	vga_ctrl->ROW_0	 	  = 0x00000000;
+	for (int i = 0; i < 20; i++) {
+		vga_ctrl->BOARD[i] = 0x00000000;
+	}
 	for (int i = 0; i < 2045; i++) {
 		vga_ctrl->RESERVED[i]	  = 0x00000000;
 	}
@@ -71,6 +73,8 @@ void step_lines(alt_u8 step) {
 
 }
 
+// Dark = index 1
+// Light = index 2
 void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2) {
 	vga_ctrl->PALETTE &= 0x00000000;
 	vga_ctrl->PALETTE |= new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1;
@@ -137,33 +141,64 @@ void test_inc_level_line_values2() {
  *
  * Expected behavior: Line increases, then the level increases.
  */
-void test_score_values(alt_u32 new_score) {
-	vga_ctrl->SCORE = new_score;
+void test_score_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->SCORE & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->SCORE &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->SCORE += (~decimal_mask + 1);
+			break;
+		}
+	}
 }
 
-void test_row_0_values() {
-	alt_u32 random_number = 0x0AAAA1111;
-	printf("Random number was %x\n", random_number);
-	vga_ctrl->ROW_0 = random_number;
+void test_board_values() {
+	//alt_u32 random_number = 0x0AAAA1111;
+	for (int i = 0; i < 20; i++) {
+		vga_ctrl->BOARD[i] = rand() % 0x000FFFFF;
+	}
 }
 
 int main() {
 	vga_clear();
-	printf("level_lines_addr = %x\n", &vga_ctrl->LEVEL_LINES);
-	printf("score_addr = %x\n", &vga_ctrl->SCORE);
-	printf("row_0_addr = %x\n", &vga_ctrl->ROW_0);
+	// dark = red, light = green
 	set_palette(colors[4].red, colors[4].green, colors[4].blue, colors[2].red, colors[2].green, colors[2].blue);
 	usleep(1000);
 	alt_u32 counter = 0;
-	test_row_0_values();
-	test_score_values(0x055555555);
 	usleep(1000);
+	int game_overing = 0;
+	int step = 5000;
 	while (1) {
 
-		if (counter % 25 == 0) {
-			//alt_u32 curr_val = vga_ctrl->LEVEL_LINES;
-			//usleep(1000);
+
+		if (counter % step == 0) {
+			if (game_overing || counter % 50000 == 0) {
+				vga_ctrl->BOARD[game_overing] |= 0x00100000;
+				game_overing++;
+				step = 100;
+				if (game_overing == 20) {
+					game_overing = 0;
+					step = 5000;
+				}
+			}
+			else {
+				test_board_values();
+			}
+		}
+		if (counter % 10 == 0) {
 			test_inc_level_line_values();
+		}
+		if (counter % 30 == 0) {
+			test_score_values();
 		}
 		counter++;
 	}

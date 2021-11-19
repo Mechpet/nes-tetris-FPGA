@@ -47,20 +47,40 @@ module vga_avl_interface (
 	output logic hs, vs						// VGA HS/VS
 );
 
-logic RAM_WRITE, RAM_READ;
+logic RAM_READ, RAM_WRITE, HW_WRITE, HW_READ;
+assign RAM_READ = AVL_READ & ~AVL_ADDR[11] & AVL_CS;
 assign RAM_WRITE = AVL_WRITE & ~AVL_ADDR[11] & AVL_CS;
-logic [11:0] AVL_READADDR, HW_READADDR;
-logic [31:0] PALETTE;
-assign AVL_READADDR = (AVL_READ) ? AVL_ADDR[10:0] : HW_READADDR;
 
-ram ram0(
+logic [10:0] HW_ADDR;
+logic [31:0] PALETTE, HW_WRITEDATA, HW_READDATA;
+
+// A = AVL access
+// B = Hardware access
+/*
+ram_hw_sw ram0(
+	.address_a(AVL_ADDR[10:0]),
+	.address_b(HW_ADDR),
 	.byteena_a(AVL_BYTE_EN),
 	.clock(CLK),
-	.data(AVL_WRITEDATA),
-	.rdaddress(AVL_READADDR),
-	.wraddress(AVL_ADDR[10:0]),
-	.wren(RAM_WRITE),
-	.q(AVL_READDATA));
+	.data_a(AVL_WRITEDATA),
+	.data_b(HW_WRITEDATA),
+	.rden_a(RAM_READ),
+	.rden_b(HW_READ),
+	.wren_a(RAM_WRITE),
+	.wren_b(1'b0),
+	.q_a(AVL_READDATA),
+	.q_b(HW_READDATA));*/
+r ram0(
+	.address_a(AVL_ADDR[10:0]),
+	.address_b(HW_ADDR),
+	.byteena_a(AVL_BYTE_EN),
+	.clock(CLK),
+	.data_a(AVL_WRITEDATA),
+	.data_b(HW_WRITEDATA),
+	.wren_a(RAM_WRITE),
+	.wren_b(1'b0),
+	.q_a(AVL_READDATA),
+	.q_b(HW_READDATA));
 
 logic pixel_clk, blank, sync, onoroff, inv, Increment;
 
@@ -96,7 +116,7 @@ block_memory BLOCK_ROM(
 	.block_template(block_template),
 	.pixel_x(DrawX[3:0]),
 	.pixel_y(DrawY[3:0]),
-	.gameover(1'b0),
+	.gameover(HW_READDATA[20]),
 	.color_index(block_color_index));
 
 assign red = r;
@@ -135,7 +155,9 @@ always_comb begin // Decode electron beam position
 		col = DrawX >> 4;
 		row = DrawY >> 4;
 		bit_index = ~DrawX[3:0];
-		HW_READADDR = 0;
+		HW_ADDR = 0;
+		HW_READ = 1'b0;
+		HW_WRITE = 1'b0;
 		
 		// Static labels look-up table
 		if (row == score_label_row && (col >= score_label_left_col && col <= score_label_right_col)) begin 
@@ -168,44 +190,59 @@ always_comb begin // Decode electron beam position
 			endcase
 		end 
 		else if (row == score_val_row && (col >= score_val_left_col && col <= score_val_right_col)) begin
-			HW_READADDR = 1;
+			HW_ADDR = score_addr;
 			unique case (col)
-				25 : addr = AVL_READDATA[31:28] * 16 + DrawY[3:0];
-				26 : addr = AVL_READDATA[27:24] * 16 + DrawY[3:0];
-				27 : addr = AVL_READDATA[23:20] * 16 + DrawY[3:0];
-				28 : addr = AVL_READDATA[19:16] * 16 + DrawY[3:0];
-				29 : addr = AVL_READDATA[15:12] * 16 + DrawY[3:0];
-				30 : addr = AVL_READDATA[11:8] * 16 + DrawY[3:0];
-				31 : addr = AVL_READDATA[7:4] * 16 + DrawY[3:0];
-				32 : addr = AVL_READDATA[3:0] * 16 + DrawY[3:0];
+				25 : addr = HW_READDATA[31:28] * 16 + DrawY[3:0];
+				26 : addr = HW_READDATA[27:24] * 16 + DrawY[3:0];
+				27 : addr = HW_READDATA[23:20] * 16 + DrawY[3:0];
+				28 : addr = HW_READDATA[19:16] * 16 + DrawY[3:0];
+				29 : addr = HW_READDATA[15:12] * 16 + DrawY[3:0];
+				30 : addr = HW_READDATA[11:8] * 16 + DrawY[3:0];
+				31 : addr = HW_READDATA[7:4] * 16 + DrawY[3:0];
+				32 : addr = HW_READDATA[3:0] * 16 + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
 		else if (row == level_val_row && (col >= level_val_left_col && col <= level_val_right_col)) begin
-			HW_READADDR = 0;
+			HW_ADDR = level_lines_addr;
+			HW_READ = 1'b1;
 			unique case (col)
-				29 : addr = AVL_READDATA[31:28] * 16 + DrawY[3:0];
-				30 : addr = AVL_READDATA[27:24] * 16 + DrawY[3:0];
-				31 : addr = AVL_READDATA[23:20] * 16 + DrawY[3:0];
-				32 : addr = AVL_READDATA[19:16] * 16 + DrawY[3:0];
+				29 : addr = HW_READDATA[31:28] * 16 + DrawY[3:0];
+				30 : addr = HW_READDATA[27:24] * 16 + DrawY[3:0];
+				31 : addr = HW_READDATA[23:20] * 16 + DrawY[3:0];
+				32 : addr = HW_READDATA[19:16] * 16 + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
 		else if (row == lines_val_row && (col >= lines_val_left_col && col <= lines_val_right_col)) begin
-			HW_READADDR = 0;
+			HW_ADDR = level_lines_addr;
+			HW_READ = 1'b1;
 			unique case (col)
-				21 : addr = AVL_READDATA[15:12] * 16 + DrawY[3:0];
-				22 : addr = AVL_READDATA[11:8] * 16 + DrawY[3:0];
-				23 : addr = AVL_READDATA[7:4] * 16 + DrawY[3:0];
-				24 : addr = AVL_READDATA[3:0] * 16 + DrawY[3:0];
+				21 : addr = HW_READDATA[15:12] * 16 + DrawY[3:0];
+				22 : addr = HW_READDATA[11:8] * 16 + DrawY[3:0];
+				23 : addr = HW_READDATA[7:4] * 16 + DrawY[3:0];
+				24 : addr = HW_READDATA[3:0] * 16 + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
 		else if ((row >= board_top_row && row <= board_bottom_row) && (col >= board_left_col && col <= board_right_col)) begin
-			HW_READADDR = 2;
+			HW_ADDR = row_0_addr + (row - board_top_row);
+			HW_READ = 1'b1;
 			draw_board = 1'b1;
-			board_row_data = '{AVL_READDATA[31:30], AVL_READDATA[29:28], AVL_READDATA[27:26], AVL_READDATA[25:24], AVL_READDATA[23:22], AVL_READDATA[21:20], AVL_READDATA[19:18], AVL_READDATA[17:16], AVL_READDATA[15:14], AVL_READDATA[13:12], AVL_READDATA[11:10], AVL_READDATA[9:8], AVL_READDATA[7:6], AVL_READDATA[5:4], AVL_READDATA[3:2], AVL_READDATA[1:0]};
-			block_template = board_row_data[col - board_left_col];
+			unique case (col - board_left_col)
+				0 : block_template = HW_READDATA[1:0];
+				1 : block_template = HW_READDATA[3:2];
+				2 : block_template = HW_READDATA[5:4];
+				3 : block_template = HW_READDATA[7:6];
+				4 : block_template = HW_READDATA[9:8];
+				5 : block_template = HW_READDATA[11:10];
+				6 : block_template = HW_READDATA[13:12];
+				7 : block_template = HW_READDATA[15:14];
+				8 : block_template = HW_READDATA[17:16];
+				9 : block_template = HW_READDATA[19:18];
+			endcase
+			//board_row_data = '{HW_READDATA[31:30], HW_READDATA[29:28], HW_READDATA[27:26], HW_READDATA[25:24], HW_READDATA[23:22], HW_READDATA[21:20], HW_READDATA[19:18], HW_READDATA[17:16], HW_READDATA[15:14], HW_READDATA[13:12], HW_READDATA[11:10], HW_READDATA[9:8], HW_READDATA[7:6], HW_READDATA[5:4], HW_READDATA[3:2], HW_READDATA[1:0]};
+			//block_template = board_row_data[col - board_left_col];
 		end
 		else begin
 			addr = 45 * 16;

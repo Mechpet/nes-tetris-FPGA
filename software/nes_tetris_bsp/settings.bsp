@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Nov 18, 2021 6:50:43 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1637239843115</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Nov 19, 2021 4:46:49 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1637362009139</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\intelFPGA_lite\18.0\SOC\software\nes_tetris_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\nes_tetris_soc.sopcinfo</SopcDesignFile>
