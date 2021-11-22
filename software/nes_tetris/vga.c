@@ -26,7 +26,8 @@ void vga_clear() {
 	for (int i = 0; i < 20; i++) {
 		vga_ctrl->BOARD[i] = 0x00000000;
 	}
-	for (int i = 0; i < 2045; i++) {
+	vga_ctrl->NEXT = 0x00000000;
+	for (int i = 0; i < 2044; i++) {
 		vga_ctrl->RESERVED[i]	  = 0x00000000;
 	}
 	vga_ctrl->PALETTE 	  = 0x00000000;
@@ -70,11 +71,33 @@ void increase_level() {
  * Expected behavior: Line count increases by the parameter amount and no hexadecimal digits are displayed on VGA.
  */
 void step_lines(alt_u8 step) {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 BCD_mask = 0x0000000F;
+	alt_u32 max_BCD = 9 - step;
 
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if (decimal_mask == 0xFFFF0000) {
+			// Signifies `line count` overflow.
+			break;
+		}
+		if ( (vga_ctrl->LEVEL_LINES & BCD_mask) > max_BCD) {
+			decimal_mask <<= 4;
+			BCD_mask <<= 4;
+			max_BCD <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + step);
+			break;
+		}
+	}
 }
 
-// Dark = index 1
-// Light = index 2
+// Dark = Color index 1
+// Light = Color index 2
 void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2) {
 	vga_ctrl->PALETTE &= 0x00000000;
 	vga_ctrl->PALETTE |= new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1;
@@ -109,29 +132,6 @@ void test_inc_level_line_values() {
 	}
 }
 
-void test_inc_level_line_values2() {
-	alt_u32 decimal_mask = 0xFFFFFFFF;
-	alt_u32 nine_mask = 0x00000009;
-	alt_u32 new_value = vga_ctrl->LEVEL_LINES;
-
-	int zeroth_bit = 0, third_bit = 3;
-
-	while (1) {
-		if ( (new_value & nine_mask) == nine_mask) {
-			decimal_mask <<= 4;
-			nine_mask <<= 4;
-			new_value &= decimal_mask;
-			zeroth_bit += 4;
-			third_bit += 4;
-		}
-		else {
-			new_value += (~decimal_mask + 1);
-			vga_ctrl->LEVEL_LINES = new_value;
-			break;
-		}
-	}
-}
-
 /** test_inc_level_line_values
  * Parameters:
  * @step = Step increment to the memory per cycle.
@@ -161,11 +161,32 @@ void test_score_values() {
 	}
 }
 
+/** test_board_values
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the board values.
+ *
+ * Expected behavior: Random blocks appear in the board per row.
+ * There should be 4 visible types of blocks that appear (i.e. the templates).
+ */
 void test_board_values() {
-	//alt_u32 random_number = 0x0AAAA1111;
 	for (int i = 0; i < 20; i++) {
 		vga_ctrl->BOARD[i] = rand() % 0x000FFFFF;
 	}
+}
+
+/** test_next_piece
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the next tetromino piece.
+ *
+ * Expected behavior: Random tetromino pieces appear in the next block window.
+ * The tetromino pieces should be centered in the window in their initial orientations.
+ */
+void test_next_piece() {
+	alt_u32 next_piece_id = rand() % 0x00000007;
+	vga_ctrl->NEXT = next_piece_id << 2;
+	printf("Next piece was %x\n.", next_piece_id);
 }
 
 int main() {
@@ -178,8 +199,6 @@ int main() {
 	int game_overing = 0;
 	int step = 5000;
 	while (1) {
-
-
 		if (counter % step == 0) {
 			if (game_overing || counter % 50000 == 0) {
 				vga_ctrl->BOARD[game_overing] |= 0x00100000;
@@ -192,6 +211,7 @@ int main() {
 			}
 			else {
 				test_board_values();
+				test_next_piece();
 			}
 		}
 		if (counter % 10 == 0) {

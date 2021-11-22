@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'nes_tetris_soc'
  * SOPC Builder design path: ../../nes_tetris_soc.sopcinfo
  *
- * Generated: Fri Nov 19 16:46:50 CST 2021
+ * Generated: Sun Nov 21 16:25:24 CST 2021
  */
 
 /*
@@ -457,7 +457,7 @@
 #define SYSID_QSYS_0_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_0_NAME "/dev/sysid_qsys_0"
 #define SYSID_QSYS_0_SPAN 8
-#define SYSID_QSYS_0_TIMESTAMP 1637361405
+#define SYSID_QSYS_0_TIMESTAMP 1637533016
 #define SYSID_QSYS_0_TYPE "altera_avalon_sysid_qsys"
 
 

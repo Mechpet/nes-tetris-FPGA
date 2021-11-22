@@ -16,7 +16,8 @@ struct VGA_STRUCT {
 	alt_u32 LEVEL_LINES;
 	alt_u32 SCORE;
 	alt_u32 BOARD[20];
-	alt_u32 RESERVED[2045];
+	alt_u32 NEXT;
+	alt_u32 RESERVED[2044];
 	alt_u32 PALETTE;
 };
 
@@ -58,5 +59,6 @@ void test_inc_level_line_values();
 void test_inc_level_line_values2();
 void test_score_values();
 void test_board_values();
+void test_next_piece();
 
 #endif /* VGA_H_ */

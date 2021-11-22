@@ -1,16 +1,26 @@
 /** block_memory:
- * Contains data pertaining to the board.
- * 1. Block template ROM index
- *    00 - White*
- *    01 - Light*
- *    10 - Dark*
+ * Contains read-only memory pertaining to the board's blocks.
+ * 1. Block template ROM index mappings:
+ *    00 - White~
+ *    01 - Light~
+ *    10 - Dark~
  *    11 - Black
  *    Gameover - Gameover
- * 2. Color palette index
+ * 2. Color palette index mappings:
  *	   00 - Black
- *    01 - Dark*
- *    10 - Light*
+ *    01 - Dark~
+ *    10 - Light~
  *    11 - White
+ *	~ implies dynamic type of block (i.e. its color is non-constant).
+ *
+ *
+ * ex: The word 8'b00011011 can be separated in to four block template indices:
+ * 00|01|10|11
+ * [0] = 2'b00 : White block
+ * [1] = 2'b01 : Light block
+ * [2] = 2'b10 : Dark block
+ * [3] = 2'b11 : Black block
+ * where the 0th index refers to the left-most block on the VGA screen.
  */
 
 module block_memory ( input logic [1:0] block_template,
@@ -19,7 +29,7 @@ module block_memory ( input logic [1:0] block_template,
 							 output logic [1:0] color_index);
 
 	parameter[0:63][31:0] TEMPLATE_ROM = {
-		// Code WHITE
+		// Code WHITE (template 00)
 		32'b11110101010101010101010101010000, // 0
 		32'b11110101010101010101010101010000, // 1
 		32'b01011111111111111111111101010000, // 2
@@ -36,7 +46,7 @@ module block_memory ( input logic [1:0] block_template,
 		32'b01010101010101010101010101010000, // 13
 		32'b00000000000000000000000000000000, // 14
 		32'b00000000000000000000000000000000, // 15
-		// Code LIGHT
+		// Code LIGHT (template 01)
 		32'b11111010101010101010101010100000, // 0
 		32'b11111010101010101010101010100000, // 1
 		32'b10101111111110101010101010100000, // 2
@@ -53,7 +63,7 @@ module block_memory ( input logic [1:0] block_template,
 		32'b10101010101010101010101010100000, // 13
 		32'b00000000000000000000000000000000, // 14
 		32'b00000000000000000000000000000000, // 15
-		// Code DARK
+		// Code DARK (template 10)
 		32'b11110101010101010101010101010000, // 0
 		32'b11110101010101010101010101010000, // 1
 		32'b01011111111101010101010101010000, // 2
@@ -70,7 +80,7 @@ module block_memory ( input logic [1:0] block_template,
 		32'b01010101010101010101010101010000, // 13
 		32'b00000000000000000000000000000000, // 14
 		32'b00000000000000000000000000000000, // 15
-		// Code GAMEOVER
+		// Code GAMEOVER (assert @gameover input)
 		32'b10101010101010101010101010101010, // 0
 		32'b10101010101010101010101010101010, // 1
 		32'b10101010101010101010101010101010, // 2
@@ -94,20 +104,24 @@ module block_memory ( input logic [1:0] block_template,
 	logic [1:0] rom_blocks [15:0];
 	
 	always_comb begin
-		// Assign the block color outputs based on the passed column, row, and template
 		rom_addr = block_template * 16 + pixel_y;
 		if (gameover == 1'b1) begin
-			// Override rom_addr
+			// Override the rom_addr if the @gameover flag is asserted.
 			rom_addr = 3 * 16 + pixel_y;
 		end
 		else if (block_template == 2'b11) begin
+			// For the constant block template, we want all black pixels.
 			rom_addr = 63;
 		end
 		else begin
+			// For the dynamic block templates, we need to retrieve a color index (color of the current pixel).
 			rom_addr = block_template * 16 + pixel_y;
 		end
 		
 		rom_data = TEMPLATE_ROM[rom_addr];
+		
+		// If @pixel_x is 0, the electron beam is at the left-most column of a block.
+		// Since the ROM is arranged with MSB denoting the left-most pixels, need to index appropriately.
 		unique case (15 - pixel_x)
 			0 : color_index = rom_data[1:0];
 			1 : color_index = rom_data[3:2];
@@ -126,7 +140,5 @@ module block_memory ( input logic [1:0] block_template,
 			14 : color_index = rom_data[29:28];
 			15 : color_index = rom_data[31:30];
 		endcase
-		//rom_blocks = '{rom_data[31:30], rom_data[29:28], rom_data[27:26], rom_data[25:24], rom_data[23:22], rom_data[21:20], rom_data[19:18], rom_data[17:16], rom_data[15:14], rom_data[13:12], rom_data[11:10], rom_data[9:8], rom_data[7:6], rom_data[5:4], rom_data[3:2], rom_data[1:0]};
-		//color_index = rom_blocks[15 - pixel_x];
 	end					 
 endmodule
