@@ -126,7 +126,7 @@ module tetromino_rom ( input logic [4:0]	identifier,
 		4'b0000,
 		4'b0010,
 		4'b0010,
-		4'b0011,
+		4'b0011
 	};
 	parameter [6:0] O_start = 0;
 	parameter [6:0] I_start = 4;
@@ -144,7 +144,6 @@ module tetromino_rom ( input logic [4:0]	identifier,
 	assign onoroff = (col == 4) ? 0 : data[col];
 	
 	always_comb begin
-		block_template = 2'b11;
 		// Determine the address of ROM
 		unique case (identifier[4:2])
 			3'b000 : begin

@@ -1,6 +1,6 @@
-16:34:14 **** Incremental Build of configuration Nios II for project nes_tetris_bsp ****
+13:32:39 **** Incremental Build of configuration Nios II for project nes_tetris_bsp ****
 make all 
 [BSP build complete]
 
-16:34:15 Build Finished (took 1s.746ms)
+13:32:41 Build Finished (took 2s.450ms)
 

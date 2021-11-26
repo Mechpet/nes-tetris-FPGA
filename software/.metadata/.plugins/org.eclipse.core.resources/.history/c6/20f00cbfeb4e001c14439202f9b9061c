@@ -1,0 +1,90 @@
+/*
+ * vga.h
+ * Based on Zuofu Cheng's text_mode_vga.h
+ *
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#ifndef VGA_H_
+#define VGA_H_
+
+#include <system.h>
+#include <alt_types.h>
+
+#define RESERVE_LENGTH 2025
+
+
+
+
+#define BOARD_BOTTOM 0x13
+#define BOARD_LEFT_EDGE 0
+#define BOARD_RIGHT_EDGE 9
+#define WHITE 0b00;
+#define LIGHT 0b01;
+#define DARK 0b10;
+#define BLACK 0b11;
+
+struct VGA_STRUCT {
+	alt_u32 LEVEL_LINES;
+	alt_u32 SCORE;
+	alt_u32 BOARD[20];
+	alt_u32 NEXT;
+	alt_u32 RESERVED[RESERVE_LENGTH];
+	alt_u32 PALETTE;
+	alt_u32 WINDOW;
+};
+
+static volatile struct VGA_STRUCT *vga_ctrl = VGA_CONTROLLER_0_BASE;
+
+
+struct COLOR{
+	char name [20];
+	alt_u8 red;
+	alt_u8 green;
+	alt_u8 blue;
+};
+
+struct piece {
+	alt_u8 row[4];
+	alt_u8 col[4];
+	unsigned id : 5;
+};
+
+static struct COLOR colors[]={
+    {"black",          0x0, 0x0, 0x0},
+	{"blue",           0x0, 0x0, 0xa},
+    {"green",          0x0, 0xa, 0x0},
+	{"cyan",           0x0, 0xa, 0xa},
+    {"red",            0xa, 0x0, 0x0},
+	{"magenta",        0xa, 0x0, 0xa},
+    {"brown",          0xa, 0x5, 0x0},
+	{"light gray",     0xa, 0xa, 0xa},
+    {"dark gray",      0x5, 0x5, 0x5},
+	{"light blue",     0x5, 0x5, 0xf},
+    {"light green",    0x5, 0xf, 0x5},
+	{"light cyan",     0x5, 0xf, 0xf},
+    {"light red",      0xf, 0x5, 0x5},
+	{"light magenta",  0xf, 0x5, 0xf},
+    {"yellow",         0xf, 0xf, 0x5},
+	{"white",          0xf, 0xf, 0xf}
+};
+
+// Functional category:
+void vga_clear();
+void increase_level();
+void step_lines(alt_u8 step);
+void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2);
+void initial_spawn_piece();
+void fetch_next_piece();
+void spawn_next_piece();
+struct piece assemble_piece(alt_u32 piece_memory);
+
+// Test category:
+void test_inc_level_line_values();
+void test_inc_level_line_values2();
+void test_score_values();
+void test_board_values();
+void test_spawn_next_piece();
+
+#endif /* VGA_H_ */

@@ -5,29 +5,13 @@ Register Map:
 0x000 = [31:16] Level number, [15:0] Line count
 0x001 = [31:0] Score value
 0x002-0x015 = 0th row, 1st row, 2nd row, 3rd row, ..., 20th row
-0x100 = Palette local register 
+0x016 = (for now) Next piece identifier
+0x800 = Palette local register 
 
-VRAM Format:
-X->
-[ 31  30-24][ 23  22-16][ 15  14-8 ][ 7    6-0 ]
-[IV3][CODE3][IV2][CODE2][IV1][CODE1][IV0][CODE0]
-
-IVn = Draw inverse glyph
-CODEn = Glyph code from IBM codepage 437
-
-Control Register Format:
-[[31-25][24-21][20-17][16-13][ 12-9][ 8-5 ][ 4-1 ][   0    ] 
-[[RSVD ][FGD_R][FGD_G][FGD_B][BKG_R][BKG_G][BKG_B][RESERVED]
-
-VSYNC signal = bit which flips on every Vsync (time for new frame), used to synchronize software
-BKG_R/G/B = Background color, flipped with foreground when IVn bit is set
-FGD_R/G/B = Foreground color, flipped with background when Inv bit is set
 
 ************************************************************************/
 import my_pkg::*;
 module vga_avl_interface (
-	// Avalon Clock Input, note this clock is also used for VGA, so this must be 50Mhz
-	// We can put a clock divider here in the future to make this IP more generalizable
 	input logic CLK,
 	
 	// Avalon Reset Input
@@ -42,7 +26,6 @@ module vga_avl_interface (
 	input  logic [31:0] AVL_WRITEDATA,		// Avalon-MM Write Data
 	output logic [31:0] AVL_READDATA,		// Avalon-MM Read Data
 	
-	// Exported Conduit (mapped to VGA port - make sure you export in Platform Designer)
 	output logic [3:0]  red, green, blue,	// VGA color channels (mapped to output pins in top-level)
 	output logic hs, vs						// VGA HS/VS
 );
@@ -52,24 +35,14 @@ assign RAM_READ = AVL_READ & ~AVL_ADDR[11] & AVL_CS;
 assign RAM_WRITE = AVL_WRITE & ~AVL_ADDR[11] & AVL_CS;
 
 logic [10:0] HW_ADDR;
-logic [31:0] PALETTE, HW_WRITEDATA, HW_READDATA;
+logic [31:0] PALETTE, WINDOW, HW_WRITEDATA, HW_READDATA;
+logic [31:0] RAM_READDATA, LOCAL_READDATA;
+assign AVL_READDATA = (AVL_ADDR[11]) ? LOCAL_READDATA : RAM_READDATA;
+
+logic [31:0] LOCAL_REGS [1:0];
 
 // A = AVL access
 // B = Hardware access
-/*
-ram_hw_sw ram0(
-	.address_a(AVL_ADDR[10:0]),
-	.address_b(HW_ADDR),
-	.byteena_a(AVL_BYTE_EN),
-	.clock(CLK),
-	.data_a(AVL_WRITEDATA),
-	.data_b(HW_WRITEDATA),
-	.rden_a(RAM_READ),
-	.rden_b(HW_READ),
-	.wren_a(RAM_WRITE),
-	.wren_b(1'b0),
-	.q_a(AVL_READDATA),
-	.q_b(HW_READDATA));*/
 r ram0(
 	.address_a(AVL_ADDR[10:0]),
 	.address_b(HW_ADDR),
@@ -79,26 +52,36 @@ r ram0(
 	.data_b(HW_WRITEDATA),
 	.wren_a(RAM_WRITE),
 	.wren_b(1'b0),
-	.q_a(AVL_READDATA),
+	.q_a(RAM_READDATA),
 	.q_b(HW_READDATA));
 
 logic pixel_clk, blank, sync, onoroff, inv, Increment;
 
-logic draw_board;
-logic [1:0] board_row_data [15:0];
-logic [1:0] block_template, block_color_index;
+// VGA Draw flags:
+logic draw_board, draw_next, draw_piece, draw_window;
 
-logic [3:0] bit_index;
+
+logic [1:0] board_row_data [15:0];
+logic [1:0] resultant_block_template, board_block_template, block_color_index, piece_block_template;
+assign resultant_block_template = (draw_piece) ? piece_block_template : board_block_template;
+
+logic [2:0] piece_window_col, piece_window_row;
+
+logic [3:0] bit_index, block_pixel_col, block_pixel_row;
 logic [6:0] row, col;
-logic [9:0] DrawX, DrawY;
+logic [9:0] DrawX, DrawY, displacedDrawX;
+assign displacedDrawX = DrawX - 8;
+
+logic [4:0] board_row;
+logic [3:0] board_col;
 
 logic [3:0] r, b, g, block_red, block_green, block_blue;
+logic [4:0] piece_identifier, pixel_x;
 
 // Font-related
 logic [9:0] addr;
 logic [15:0] data;
 	
-//Declare submodules..e.g. VGA controller, ROMS, etc
 vga_controller VGA_CONTROLLER(
 	.Clk(CLK), 
 	.Reset(RESET), 
@@ -113,19 +96,25 @@ font_rom_upscaled FONT_ROM(
 	.addr(addr), 
 	.data(data));
 block_memory BLOCK_ROM(
-	.block_template(block_template),
-	.pixel_x(DrawX[3:0]),
+	.block_template(resultant_block_template),
+	.pixel_x(pixel_x),
 	.pixel_y(DrawY[3:0]),
-	.gameover(HW_READDATA[20]),
+	.gameover(1'b0),
 	.color_index(block_color_index));
+tetromino_rom TETROMINO_ROM(
+	.identifier(piece_identifier),
+	.col(piece_window_col),
+	.row(piece_window_row),
+	.block_template(piece_block_template));
 
 assign red = r;
 assign green = g;
 assign blue = b;
 
 always_ff @ (posedge CLK) begin
-	if (RESET)
-		PALETTE <= 32'h0000;	// Reset palette to 0
+	if (RESET) begin
+		LOCAL_REGS <= '{default:'0};
+	end
 	else
 	begin	
 	if (AVL_CS & AVL_ADDR[11])	// Chip-select indicates operation
@@ -133,15 +122,18 @@ always_ff @ (posedge CLK) begin
 			// Assume that only one operation can be performed at a given time
 			if (AVL_WRITE) begin
 				unique case (AVL_BYTE_EN)	// Write a subset of the data at register[]
-					4'b1111 : PALETTE <= AVL_WRITEDATA;
-					4'b1100 : PALETTE[31:16] <= AVL_WRITEDATA[31:16];
-					4'b0011 : PALETTE[15:0] <= AVL_WRITEDATA[15:0];
-					4'b1000 : PALETTE[31:24] <= AVL_WRITEDATA[31:24];
-					4'b0100 : PALETTE[23:16] <= AVL_WRITEDATA[23:16];
-					4'b0010 : PALETTE[15:8] <= AVL_WRITEDATA[15:8];
-					4'b0001 : PALETTE[7:0] <= AVL_WRITEDATA[7:0];
+					4'b1111 : LOCAL_REGS[AVL_ADDR - palette_addr] <= AVL_WRITEDATA;
+					4'b1100 : LOCAL_REGS[AVL_ADDR - palette_addr][31:16] <= AVL_WRITEDATA[31:16];
+					4'b0011 : LOCAL_REGS[AVL_ADDR - palette_addr][15:0] <= AVL_WRITEDATA[15:0];
+					4'b1000 : LOCAL_REGS[AVL_ADDR - palette_addr][31:24] <= AVL_WRITEDATA[31:24];
+					4'b0100 : LOCAL_REGS[AVL_ADDR - palette_addr][23:16] <= AVL_WRITEDATA[23:16];
+					4'b0010 : LOCAL_REGS[AVL_ADDR - palette_addr][15:8] <= AVL_WRITEDATA[15:8];
+					4'b0001 : LOCAL_REGS[AVL_ADDR - palette_addr][7:0] <= AVL_WRITEDATA[7:0];
 					default : ;
 				endcase
+			end
+			else if (AVL_READ) begin
+				LOCAL_READDATA <= LOCAL_REGS[AVL_ADDR - palette_addr];
 			end
 		end
 	end
@@ -150,99 +142,219 @@ end
 always_comb begin // Decode electron beam position
 		addr = 45 * 16;
 		draw_board = 1'b0;
+		draw_piece = 1'b0;
+		draw_window = 1'b0;
 		board_row_data = '{default:'0};
-		block_template = 2'b00;
+		board_block_template = 2'b11;
+		board_col = 0;
+		board_row = 0;
 		col = DrawX >> 4;
 		row = DrawY >> 4;
 		bit_index = ~DrawX[3:0];
-		HW_ADDR = 0;
+		piece_identifier = 5'h0;
+		piece_window_row = 2'b00;
+		piece_window_col = 2'b00;
+		pixel_x = 0;
+		HW_ADDR = 32'h0;
 		HW_READ = 1'b0;
 		HW_WRITE = 1'b0;
 		
 		// Static labels look-up table
-		if (row == score_label_row && (col >= score_label_left_col && col <= score_label_right_col)) begin 
-			unique case (col)
-				28 : addr = start_S + DrawY[3:0]; // 'S'
-				29 : addr = start_C + DrawY[3:0]; // 'C'
-				30 : addr = start_O + DrawY[3:0]; // 'O'
-				31 : addr = start_R + DrawY[3:0]; // 'R'
-				32 : addr = start_E + DrawY[3:0]; // 'E'
+		if ( (row == score_label_row)
+		&& ( (col >= score_label_left_col) && (col <= score_label_right_col) ) ) begin 
+		// "SCORE" 
+			unique case (col - score_label_left_col)
+				0 : addr = start_S + DrawY[3:0]; // 'S'
+				1 : addr = start_C + DrawY[3:0]; // 'C'
+				2 : addr = start_O + DrawY[3:0]; // 'O'
+				3 : addr = start_R + DrawY[3:0]; // 'R'
+				4 : addr = start_E + DrawY[3:0]; // 'E'
 				default : addr = 45 * 16;
 			endcase
 		end
-		else if (row == lines_label_row && (col >= lines_label_left_col && col <= lines_label_right_col)) begin
-			unique case (col)
-				15 : addr = start_L + DrawY[3:0];    // 'L'
-				16 : addr = start_I + DrawY[3:0];    // 'I'
-				17 : addr = start_N + DrawY[3:0];    // 'N'
-				18 : addr = start_E + DrawY[3:0];    // 'E'
-				19 : addr = start_S + DrawY[3:0];    // 'S'
-				20 : addr = start_dash + DrawY[3:0]; // '-'
+		else if ( (row == lines_label_row)
+		&& ( (col >= lines_label_left_col) && (col <= lines_label_right_col) ) ) begin
+		// "LINES-"
+			unique case (col - lines_label_left_col)
+				0 : addr = start_L + DrawY[3:0];    // 'L'
+				1 : addr = start_I + DrawY[3:0];    // 'I'
+				2 : addr = start_N + DrawY[3:0];    // 'N'
+				3 : addr = start_E + DrawY[3:0];    // 'E'
+				4 : addr = start_S + DrawY[3:0];    // 'S'
+				5 : addr = start_dash + DrawY[3:0]; // '-'
 				default : addr = 45 * 16;
 			endcase
 		end
-		else if (row == level_label_row && (col >= level_label_left_col && col <= level_label_right_col)) begin
-			unique case (col)
-				28, 32 : addr = start_L + DrawY[3:0]; // 'L'
-				29, 31 : addr = start_E + DrawY[3:0]; // 'E'
-				30 : addr = start_V + DrawY[3:0]; 	  // 'V'
+		else if ( (row == level_label_row)
+		&& ( (col >= level_label_left_col) && (col <= level_label_right_col) ) ) begin
+		// "LEVEL"
+			unique case (col - level_label_left_col)
+				0, 4 : addr = start_L + DrawY[3:0]; // 'L'
+				1, 3 : addr = start_E + DrawY[3:0]; // 'E'
+				2 : addr = start_V + DrawY[3:0]; 	  // 'V'
 				default : addr = 45 * 16;
 			endcase
 		end 
-		else if (row == score_val_row && (col >= score_val_left_col && col <= score_val_right_col)) begin
+		else if ( (row == next_label_row)
+		&& ( (col >= next_label_left_col) && (col <= next_label_right_col) ) ) begin
+		// "NEXT"
+			unique case (col - next_label_left_col)
+				0 : addr = start_N + DrawY[3:0]; // 'N'
+				1 : addr = start_E + DrawY[3:0]; // 'E'
+				2 : addr = start_X + DrawY[3:0]; // 'X'
+				3 : addr = start_T + DrawY[3:0]; // 'T'
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == score_val_row)
+		&& ( (col >= score_val_left_col) && (col <= score_val_right_col) ) ) begin
+		// 8-digit decimal number representing score value
 			HW_ADDR = score_addr;
-			unique case (col)
-				25 : addr = HW_READDATA[31:28] * 16 + DrawY[3:0];
-				26 : addr = HW_READDATA[27:24] * 16 + DrawY[3:0];
-				27 : addr = HW_READDATA[23:20] * 16 + DrawY[3:0];
-				28 : addr = HW_READDATA[19:16] * 16 + DrawY[3:0];
-				29 : addr = HW_READDATA[15:12] * 16 + DrawY[3:0];
-				30 : addr = HW_READDATA[11:8] * 16 + DrawY[3:0];
-				31 : addr = HW_READDATA[7:4] * 16 + DrawY[3:0];
-				32 : addr = HW_READDATA[3:0] * 16 + DrawY[3:0];
+			unique case (col - score_val_left_col)
+				0 : addr = (HW_READDATA[31:28] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[27:24] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[23:20] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[19:16] * 16) + DrawY[3:0];
+				4 : addr = (HW_READDATA[15:12] * 16) + DrawY[3:0];
+				5 : addr = (HW_READDATA[11:8] * 16) + DrawY[3:0];
+				6 : addr = (HW_READDATA[7:4] * 16) + DrawY[3:0];
+				7 : addr = (HW_READDATA[3:0] * 16) + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
-		else if (row == level_val_row && (col >= level_val_left_col && col <= level_val_right_col)) begin
+		else if ( (row == level_val_row)
+		&& ( (col >= level_val_left_col) && (col <= level_val_right_col) ) ) begin
+		// 4-digit decimal number representing level value
 			HW_ADDR = level_lines_addr;
 			HW_READ = 1'b1;
-			unique case (col)
-				29 : addr = HW_READDATA[31:28] * 16 + DrawY[3:0];
-				30 : addr = HW_READDATA[27:24] * 16 + DrawY[3:0];
-				31 : addr = HW_READDATA[23:20] * 16 + DrawY[3:0];
-				32 : addr = HW_READDATA[19:16] * 16 + DrawY[3:0];
+			unique case (col - level_val_left_col)
+				0 : addr = (HW_READDATA[31:28] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[27:24] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[23:20] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[19:16] * 16) + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
-		else if (row == lines_val_row && (col >= lines_val_left_col && col <= lines_val_right_col)) begin
+		else if ( (row == lines_val_row)
+		&& ( (col >= lines_val_left_col) && (col <= lines_val_right_col) ) ) begin
+		// 4-digit decimal number representing line count value
 			HW_ADDR = level_lines_addr;
 			HW_READ = 1'b1;
-			unique case (col)
-				21 : addr = HW_READDATA[15:12] * 16 + DrawY[3:0];
-				22 : addr = HW_READDATA[11:8] * 16 + DrawY[3:0];
-				23 : addr = HW_READDATA[7:4] * 16 + DrawY[3:0];
-				24 : addr = HW_READDATA[3:0] * 16 + DrawY[3:0];
+			unique case (col - lines_val_left_col)
+				0 : addr = (HW_READDATA[15:12] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[11:8] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[7:4] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[3:0] * 16) + DrawY[3:0];
 				default : addr = 45 * 16;
 			endcase
 		end
-		else if ((row >= board_top_row && row <= board_bottom_row) && (col >= board_left_col && col <= board_right_col)) begin
-			HW_ADDR = row_0_addr + (row - board_top_row);
+		else if ( ( (row >= board_top_row) && (row <= board_bottom_row) )
+		&& ( (col >= board_left_col) && (col <= board_right_col) ) ) begin
+		// 10 by 20 blocks representing the game field
+		
+			draw_board = 1'b1;
+			pixel_x = DrawX[3:0];
+			board_row = row - board_top_row;
+			board_col = col - board_left_col;
+			
+			if ( ( (board_row >= LOCAL_REGS[window_index][22:18]) && (board_row <= LOCAL_REGS[window_index][17:13]) ) 
+			&& ( (board_col >= LOCAL_REGS[window_index][12:9]) && (board_col <= LOCAL_REGS[window_index][8:5]) ) ) begin
+				piece_identifier = LOCAL_REGS[window_index][4:0];
+				piece_window_row = (LOCAL_REGS[window_index][17:13] <= 10) ? (3 - (LOCAL_REGS[window_index][17:13] - board_row)) : (board_row - LOCAL_REGS[window_index][22:18]);
+				piece_window_col = (LOCAL_REGS[window_index][12:9] <= 5) ? (LOCAL_REGS[window_index][8:5] - board_col) : (3 - (board_col - LOCAL_REGS[window_index][12:9]));
+			end	
+			
+			if (piece_block_template == 2'b11) begin
+				HW_ADDR = (row_0_addr + board_row);
+				HW_READ = 1'b1;
+				unique case (board_col)
+					0 : board_block_template = HW_READDATA[1:0];
+					1 : board_block_template = HW_READDATA[3:2];
+					2 : board_block_template = HW_READDATA[5:4];
+					3 : board_block_template = HW_READDATA[7:6];
+					4 : board_block_template = HW_READDATA[9:8];
+					5 : board_block_template = HW_READDATA[11:10];
+					6 : board_block_template = HW_READDATA[13:12];
+					7 : board_block_template = HW_READDATA[15:14];
+					8 : board_block_template = HW_READDATA[17:16];
+					9 : board_block_template = HW_READDATA[19:18];
+				endcase
+			end
+			else begin
+				draw_piece = 1'b1;
+			end
+		end
+			/*
+			else begin
+				resultant_block_template = board_block_template;
+			end*/
+				/*unique case (board_col)
+					0 : resultant_block_template = HW_READDATA[1:0];
+					1 : resultant_block_template = HW_READDATA[3:2];
+					2 : resultant_block_template = HW_READDATA[5:4];
+					3 : resultant_block_template = HW_READDATA[7:6];
+					4 : resultant_block_template = HW_READDATA[9:8];
+					5 : resultant_block_template = HW_READDATA[11:10];
+					6 : resultant_block_template = HW_READDATA[13:12];
+					7 : resultant_block_template = HW_READDATA[15:14];
+					8 : resultant_block_template = HW_READDATA[17:16];
+					9 : resultant_block_template = HW_READDATA[19:18];
+				endcase*/
+			/*
+			HW_ADDR = (row_0_addr + board_row);
 			HW_READ = 1'b1;
 			draw_board = 1'b1;
-			unique case (col - board_left_col)
-				0 : block_template = HW_READDATA[1:0];
-				1 : block_template = HW_READDATA[3:2];
-				2 : block_template = HW_READDATA[5:4];
-				3 : block_template = HW_READDATA[7:6];
-				4 : block_template = HW_READDATA[9:8];
-				5 : block_template = HW_READDATA[11:10];
-				6 : block_template = HW_READDATA[13:12];
-				7 : block_template = HW_READDATA[15:14];
-				8 : block_template = HW_READDATA[17:16];
-				9 : block_template = HW_READDATA[19:18];
+			pixel_x = DrawX[3:0];
+				unique case (board_col)
+					0 : board_block_template = HW_READDATA[1:0];
+					1 : board_block_template = HW_READDATA[3:2];
+					2 : board_block_template = HW_READDATA[5:4];
+					3 : board_block_template = HW_READDATA[7:6];
+					4 : board_block_template = HW_READDATA[9:8];
+					5 : board_block_template = HW_READDATA[11:10];
+					6 : board_block_template = HW_READDATA[13:12];
+					7 : board_block_template = HW_READDATA[15:14];
+					8 : board_block_template = HW_READDATA[17:16];
+					9 : board_block_template = HW_READDATA[19:18];
+				endcase*/
+				/*
+			HW_ADDR = curr_addr;
+			HW_READ = 1'b1;
+			draw_board = 1'b1;
+			pixel_x = DrawX[3:0];
+			
+			if ( ( (board_row >= HW_READDATA[22:18]) && (board_row <= HW_READDATA[17:13]) ) 
+			&& ( (board_col >= HW_READDATA[12:9]) && (board_col <= HW_READDATA[8:5]) ) ) begin
+				piece_identifier = HW_READDATA[4:0];
+				piece_window_row = (HW_READDATA[17:13] <= 10) ? (3 - (HW_READDATA[17:13] - board_row)) : (board_row - HW_READDATA[22:18]);
+				piece_window_col = (HW_READDATA[12:9] <= 5) ? (HW_READDATA[8:5] - board_col) : (3 - (board_col - HW_READDATA[12:9]));
+			end*/
+			//if (piece_block_template == 2'b11) begin
+				// Case: Piece is not on the current block - draw the board.
+		//end
+		else if ( ( (row >= next_window_top_row) && (row <= next_window_bottom_row) )
+		&& ( (col >= next_window_left_col) && (col <= next_window_right_col) ) ) begin
+		// 4 by 3 blocks representing the next piece window (to center the piece, need to shift the columns if the piece needs it)
+			HW_ADDR = next_addr;
+			HW_READ = 1'b1;
+			draw_board = 1'b1;
+			draw_piece = 1'b1;
+			piece_identifier = HW_READDATA[4:0];
+			piece_window_row = ( (row - next_window_top_row) + 1);
+			unique case (piece_identifier[4:2])
+				3'b000, 3'b001 : 
+					// All pieces with symmetric initial orientations (no shift)
+					begin
+						piece_window_col = next_window_right_col - col;
+						pixel_x = DrawX[3:0];
+					end
+				default:
+					// All pieces with non-symmetric initial orientations (required shift)
+					begin
+						piece_window_col = (next_window_right_col - ( (DrawX + 8) >> 4));
+						pixel_x = displacedDrawX[3:0];
+					end
 			endcase
-			//board_row_data = '{HW_READDATA[31:30], HW_READDATA[29:28], HW_READDATA[27:26], HW_READDATA[25:24], HW_READDATA[23:22], HW_READDATA[21:20], HW_READDATA[19:18], HW_READDATA[17:16], HW_READDATA[15:14], HW_READDATA[13:12], HW_READDATA[11:10], HW_READDATA[9:8], HW_READDATA[7:6], HW_READDATA[5:4], HW_READDATA[3:2], HW_READDATA[1:0]};
-			//block_template = board_row_data[col - board_left_col];
 		end
 		else begin
 			addr = 45 * 16;
@@ -250,8 +362,6 @@ always_comb begin // Decode electron beam position
 		onoroff = data[bit_index];
 end
 
-
-//handle drawing (may either be combinational or sequential - or both).
 always_ff @ (posedge pixel_clk) begin
 	if (RESET || !blank) begin
 		r <= 4'h0;
@@ -260,6 +370,7 @@ always_ff @ (posedge pixel_clk) begin
 	end
 	else begin
 		if (draw_board) begin
+		// -> Pixel is colored based on block templates and color palettes.
 			unique case (block_color_index)
 				2'b00 : begin
 					r <= 4'h0;
@@ -267,14 +378,14 @@ always_ff @ (posedge pixel_clk) begin
 					b <= 4'h0;
 				end
 				2'b01 : begin
-					r <= PALETTE[12:9];
-					g <= PALETTE[8:5];
-					b <= PALETTE[4:1];
+					r <= LOCAL_REGS[palette_index][12:9];
+					g <= LOCAL_REGS[palette_index][8:5];
+					b <= LOCAL_REGS[palette_index][4:1];
 				end
 				2'b10 : begin
-					r <= PALETTE[24:21];
-					g <= PALETTE[20:17];
-					b <= PALETTE[16:13];
+					r <= LOCAL_REGS[palette_index][24:21];
+					g <= LOCAL_REGS[palette_index][20:17];
+					b <= LOCAL_REGS[palette_index][16:13];
 				end
 				2'b11 : begin
 					r <= 4'b1111;
@@ -284,6 +395,7 @@ always_ff @ (posedge pixel_clk) begin
 			endcase
 		end
 		else begin
+		// -> Black and white coloring.
 			r <= (onoroff) ? 4'b1111 : 4'h0 ;
 			g <= (onoroff) ? 4'b1111 : 4'h0 ;
 			b <= (onoroff) ? 4'b1111 : 4'h0 ;

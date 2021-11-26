@@ -1,0 +1,368 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+/** vga_clear
+ * Parameters: None.
+ *
+ * Description: Clear out the memory associated with the
+ * VGA controller component.
+ *
+ * Expected behavior: Line, level, and current score are reset.
+ */
+void vga_clear() {
+	vga_ctrl->LEVEL_LINES = 0x00000000;
+	vga_ctrl->SCORE	 	  = 0x00000000;
+	for (int i = 0; i < 20; i++) {
+		vga_ctrl->BOARD[i] = 0x000FFFFF;
+	}
+	vga_ctrl->NEXT = 0x00000000;
+	for (int i = 0; i < RESERVE_LENGTH; i++) {
+		vga_ctrl->RESERVED[i]	  = 0x00000000;
+	}
+	vga_ctrl->PALETTE 	  = 0x00000000;
+	vga_ctrl->WINDOW	  = 0x00000000;
+}
+
+/** increase_level
+ * Parameters: None.
+ *
+ * Description: Increment the current level.
+ *
+ * Expected behavior: Level increases by 1 and no hexadecimal digits are displayed on VGA.
+ */
+void increase_level() {
+	alt_u32 decimal_mask = 0xFFFF0000;
+	alt_u32 nine_mask = 0x00090000;
+	alt_u32 lines_mask 	 = 0x0000FFFF;
+	alt_u32 curr_lines   = vga_ctrl->LEVEL_LINES & lines_mask;
+
+	int zeroth_bit = 16, third_bit = 18;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1 + curr_lines);
+			break;
+		}
+	}
+}
+
+/** step_lines
+ * Parameters:
+ * @step = Number of lines to add to the current line count.
+ *
+ * Description: Step the current line count by a parameter amount.
+ *
+ * Expected behavior: Line count increases by the parameter amount and no hexadecimal digits are displayed on VGA.
+ */
+void step_lines(alt_u8 step) {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 BCD_mask = 0x0000000F;
+	alt_u32 max_BCD = 9 - step;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if (decimal_mask == 0xFFFF0000) {
+			// Signifies `line count` overflow.
+			break;
+		}
+		if ( (vga_ctrl->LEVEL_LINES & BCD_mask) > max_BCD) {
+			decimal_mask <<= 4;
+			BCD_mask <<= 4;
+			max_BCD <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + step);
+			break;
+		}
+	}
+}
+
+// Dark = Color index 1
+// Light = Color index 2
+void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2) {
+	vga_ctrl->PALETTE &= 0x00000000;
+
+	vga_ctrl->PALETTE |= new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1;
+	printf("Palette = %x\n", new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1);
+}
+
+/** test_inc_level_line_values
+ * Parameters: None.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases (still has alphabet), then the level increases (still has alphabet).
+ */
+void test_inc_level_line_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+/** test_inc_level_line_values
+ * Parameters:
+ * @step = Step increment to the memory per cycle.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases, then the level increases.
+ */
+void test_score_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->SCORE & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->SCORE &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->SCORE += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+/** test_board_values
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the board values.
+ *
+ * Expected behavior: Random blocks appear in the board per row.
+ * There should be 4 visible types of blocks that appear (i.e. the templates).
+ */
+void test_board_values() {
+	for (int i = 0; i < 20; i++) {
+		vga_ctrl->BOARD[i] = rand() % 0x000FFFFF;
+	}
+}
+
+/** test_next_piece
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the next tetromino piece.
+ *
+ * Expected behavior: Random tetromino pieces appear in the next block window.
+ * The tetromino pieces should be centered in the window in their initial orientations.
+ */
+void test_next_piece() {
+	alt_u32 next_piece_id = rand() % 0x00000007;
+	vga_ctrl->NEXT = next_piece_id << 2;
+	printf("Next piece was %x\n.", next_piece_id);
+}
+
+/*
+ * ([22:18] Window align top : 0
+ * | [17:13] Window align bottom : 1
+ * | [12:9] Window align left : 3
+ * | [8:5] Window align right : 6
+ * | [4:2] Current piece identifier : random
+ * | [1:0] Current piece rotation identifier : 2'b00
+ */
+void test_spawn_current_piece() {
+	alt_u32 current_piece_id = rand() % 0x00000007, active0, active1;
+	alt_u32 clear_mask = 0x000FFFFF;
+	// Vertical alignment
+	vga_ctrl->WINDOW = (current_piece_id << 2 | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+	switch (current_piece_id) {
+		case (0x00000000):
+			active0 = active1 = 0x06000000;
+			break;
+		case (0x00000001):
+			active0 = 0x0F000000;
+			active1 = 0x00000000;
+			break;
+		case (0x00000002):
+			active0 = 0x06000000;
+			active1 = 0x0C000000;
+			break;
+		case (0x00000003):
+			active0 = 0x0C000000;
+			active1 = 0x06000000;
+			break;
+		case (0x00000004):
+			active0 = 0x0E000000;
+			active1 = 0x04000000;
+			break;
+		case (0x00000005):
+			active0 = 0x0E000000;
+			active1 = 0x08000000;
+			break;
+		case (0x00000006):
+			active0 = 0x0E000000;
+			active1 = 0x02000000;
+			break;
+	}
+	vga_ctrl->BOARD[0] &= clear_mask;
+	vga_ctrl->BOARD[0] |= active0;
+	vga_ctrl->BOARD[1] &= clear_mask;
+	vga_ctrl->BOARD[1] |= active1;
+	printf("WINDOW is %x\n", vga_ctrl->WINDOW);
+}
+
+void initial_spawn_piece() {
+	// Spawn the current piece and the next piece.
+	alt_u32 current_piece_id = 0, active0, active1;
+	vga_ctrl->WINDOW = (0 | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+	switch (current_piece_id) {
+		case (0x00000000):
+			active0 = active1 = 0x06000000;
+			break;
+		case (0x00000001):
+			active0 = 0x0F000000;
+			active1 = 0x00000000;
+			break;
+		case (0x00000002):
+			active0 = 0x06000000;
+			active1 = 0x0C000000;
+			break;
+		case (0x00000003):
+			active0 = 0x0C000000;
+			active1 = 0x06000000;
+			break;
+		case (0x00000004):
+			active0 = 0x0E000000;
+			active1 = 0x04000000;
+			break;
+		case (0x00000005):
+			active0 = 0x0E000000;
+			active1 = 0x08000000;
+			break;
+		case (0x00000006):
+			active0 = 0x0E000000;
+			active1 = 0x02000000;
+			break;
+	}
+	vga_ctrl->BOARD[0] |= active0;
+	vga_ctrl->BOARD[1] |= active1;
+	spawn_next_piece();
+	printf("WINDOW is %x\n", vga_ctrl->WINDOW);
+}
+
+void spawn_next_piece() {
+	alt_u32 next_piece_id = rand() % 0x00000007;
+	vga_ctrl->NEXT = 0 << 2;
+	printf("Next piece was %x\n.", 0);
+}
+
+void fetch_next_piece() {
+	vga_ctrl->WINDOW = (vga_ctrl->NEXT | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+
+	spawn_next_piece();
+}
+
+void drop_curr_piece() {
+	alt_u32 inc = 0x00000001;
+	alt_u32 piece_identifier = vga_ctrl->WINDOW & 0x0000001F;
+	alt_u32 top_window = vga_ctrl->WINDOW & 0x007C0000;
+	alt_u32 bottom_window = vga_ctrl->WINDOW & 0x0003E000;
+
+	// Check for if the bottom of the piece is directly above a block.
+	switch (piece_identifier) {
+
+		case 0x00000000:
+			printf("Detected 'O' w/ bottom at %x.\n", bottom_window);
+			if (bottom_window == BOARD_BOTTOM << 13) {
+				printf("Bottom %x == Board's bottom %x\n", bottom_window, BOARD_BOTTOM << 13);
+				// Bottom of the 'O' block touched the bottom of the board:
+				vga_ctrl->BOARD[19] &= 0x000FF0FF;
+				vga_ctrl->BOARD[18] &= 0x000FF0FF;
+				fetch_next_piece();
+				return;
+			}
+			break;
+	}
+	// Check for if the bottom of the piece is directly above the bottom of the board.
+
+	// Else, just drop the piece.
+
+	alt_u32 bottom_inc = inc << 13;
+	alt_u32 top_inc = (bottom_window > 0x00042000) ? inc << 18 : 0;
+
+	vga_ctrl->WINDOW += (bottom_inc | top_inc);
+}
+
+int main() {
+	vga_clear();
+	// dark = red, light = green
+	set_palette(colors[4].red, colors[4].green, colors[4].blue, colors[2].red, colors[2].green, colors[2].blue);
+	usleep(1000);
+	alt_u32 counter = 0;
+	usleep(1000);
+	int game_overing = 0;
+	int step = 5000;
+
+	initial_spawn_piece();
+
+	while (1) {
+
+		/*
+		if (counter % step == 0) {
+			if (game_overing || counter % 50000 == 0) {
+				//vga_ctrl->BOARD[game_overing] |= 0x00100000;
+				game_overing++;
+				step = 100;
+				if (game_overing == 20) {
+					game_overing = 0;
+					step = 5000;
+				}
+			}
+			else {
+				//test_board_values();
+				test_spawn_current_piece();
+				test_next_piece();
+			//}
+		}
+		if (counter % 10 == 0) {
+			test_inc_level_line_values();
+		}
+		if (counter % 30 == 0) {
+			test_score_values();
+		}*/
+		if (counter % 650 == 0) {
+			drop_curr_piece();
+		}
+		counter++;
+	}
+	return 0;
+}
