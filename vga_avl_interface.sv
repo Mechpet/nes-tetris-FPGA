@@ -7,10 +7,12 @@ Register Map:
 0x002-0x015 = 0th row, 1st row, 2nd row, 3rd row, ..., 20th row
 0x016 = (for now) Next piece identifier
 0x800 = Palette local register 
-
+0X801 = Current piece local register
+0x802 = Seed bit #1
 
 ************************************************************************/
 import my_pkg::*;
+import template_pkg::*;
 module vga_avl_interface (
 	input logic CLK,
 	
@@ -34,12 +36,14 @@ logic RAM_READ, RAM_WRITE, HW_WRITE, HW_READ;
 assign RAM_READ = AVL_READ & ~AVL_ADDR[11] & AVL_CS;
 assign RAM_WRITE = AVL_WRITE & ~AVL_ADDR[11] & AVL_CS;
 
+logic [31:0] LOCAL_REGS [1:0];
 logic [10:0] HW_ADDR;
 logic [31:0] PALETTE, WINDOW, HW_WRITEDATA, HW_READDATA;
 logic [31:0] RAM_READDATA, LOCAL_READDATA;
 assign AVL_READDATA = (AVL_ADDR[11]) ? LOCAL_READDATA : RAM_READDATA;
+assign PALETTE = LOCAL_REGS[palette_index];
+assign WINDOW = LOCAL_REGS[window_index];
 
-logic [31:0] LOCAL_REGS [1:0];
 
 // A = AVL access
 // B = Hardware access
@@ -58,7 +62,7 @@ r ram0(
 logic pixel_clk, blank, sync, onoroff, inv, Increment;
 
 // VGA Draw flags:
-logic draw_board, draw_next, draw_piece, draw_window;
+logic draw_board, draw_next, draw_piece, draw_window, game_over;
 
 
 logic [1:0] board_row_data [15:0];
@@ -67,7 +71,7 @@ assign resultant_block_template = (draw_piece) ? piece_block_template : board_bl
 
 logic [2:0] piece_window_col, piece_window_row;
 
-logic [3:0] bit_index, block_pixel_col, block_pixel_row;
+logic [3:0] bit_index, block_pixel_col, block_pixel_row, pixel_x;
 logic [6:0] row, col;
 logic [9:0] DrawX, DrawY, displacedDrawX;
 assign displacedDrawX = DrawX - 8;
@@ -76,11 +80,16 @@ logic [4:0] board_row;
 logic [3:0] board_col;
 
 logic [3:0] r, b, g, block_red, block_green, block_blue;
-logic [4:0] piece_identifier, pixel_x;
+logic [4:0] piece_identifier;
 
 // Font-related
 logic [9:0] addr;
 logic [15:0] data;
+
+logic [4:0] random;
+logic stop_bit;
+assign stop_bit = (AVL_ADDR[11] & AVL_CS & AVL_READ);
+logic [31:0] random2, random3;
 	
 vga_controller VGA_CONTROLLER(
 	.Clk(CLK), 
@@ -99,17 +108,46 @@ block_memory BLOCK_ROM(
 	.block_template(resultant_block_template),
 	.pixel_x(pixel_x),
 	.pixel_y(DrawY[3:0]),
-	.gameover(1'b0),
+	.gameover(game_over),
 	.color_index(block_color_index));
 tetromino_rom TETROMINO_ROM(
 	.identifier(piece_identifier),
 	.col(piece_window_col),
 	.row(piece_window_row),
 	.block_template(piece_block_template));
+fibonacci_lfsr_nbit rng(.clk(CLK),
+	.reset(RESET),
+	.data(random));
+GARO rng2 [31:0] (.stop(stop_bit),
+	.clk(CLK),
+	.reset(RESET),
+	.random(random2));
+hw_rng rng3(.clk(CLK),
+	.reset(RESET),
+	.load(1'b0),
+	.seed(32'h0),
+	.random_state(random3));
 
 assign red = r;
 assign green = g;
 assign blue = b;
+
+
+logic [31:0] seed;
+
+always_ff @ (posedge CLK) begin
+	if (RESET) begin
+		seed <= '{default:'0};
+	end
+	else begin
+		seed[0] <= pixel_clk;
+		seed[1] <= CLK;
+		seed[2] <= pixel_clk;
+		seed[3] <= ~CLK;
+		seed[4] <= ~pixel_clk;
+		seed[5] <= CLK;
+	end
+end
 
 always_ff @ (posedge CLK) begin
 	if (RESET) begin
@@ -133,7 +171,12 @@ always_ff @ (posedge CLK) begin
 				endcase
 			end
 			else if (AVL_READ) begin
-				LOCAL_READDATA <= LOCAL_REGS[AVL_ADDR - palette_addr];
+				if (AVL_ADDR == 12'h802) begin
+					LOCAL_READDATA <= random3;
+				end
+				else begin
+					LOCAL_READDATA <= LOCAL_REGS[AVL_ADDR - palette_addr];
+				end
 			end
 		end
 	end
@@ -145,9 +188,10 @@ always_comb begin // Decode electron beam position
 		draw_piece = 1'b0;
 		draw_window = 1'b0;
 		board_row_data = '{default:'0};
-		board_block_template = 2'b11;
+		board_block_template = BLACK;
 		board_col = 0;
 		board_row = 0;
+		game_over = 1'b0;
 		col = DrawX >> 4;
 		row = DrawY >> 4;
 		bit_index = ~DrawX[3:0];
@@ -251,22 +295,22 @@ always_comb begin // Decode electron beam position
 		else if ( ( (row >= board_top_row) && (row <= board_bottom_row) )
 		&& ( (col >= board_left_col) && (col <= board_right_col) ) ) begin
 		// 10 by 20 blocks representing the game field
-		
 			draw_board = 1'b1;
 			pixel_x = DrawX[3:0];
 			board_row = row - board_top_row;
 			board_col = col - board_left_col;
+			HW_ADDR = (row_0_addr + board_row);
+			HW_READ = 1'b1;
+			game_over = HW_READDATA[20];
 			
-			if ( ( (board_row >= LOCAL_REGS[window_index][22:18]) && (board_row <= LOCAL_REGS[window_index][17:13]) ) 
-			&& ( (board_col >= LOCAL_REGS[window_index][12:9]) && (board_col <= LOCAL_REGS[window_index][8:5]) ) ) begin
-				piece_identifier = LOCAL_REGS[window_index][4:0];
-				piece_window_row = (LOCAL_REGS[window_index][17:13] <= 10) ? (3 - (LOCAL_REGS[window_index][17:13] - board_row)) : (board_row - LOCAL_REGS[window_index][22:18]);
-				piece_window_col = (LOCAL_REGS[window_index][12:9] <= 5) ? (LOCAL_REGS[window_index][8:5] - board_col) : (3 - (board_col - LOCAL_REGS[window_index][12:9]));
+			if ( ( (board_row >= WINDOW[22:18]) && (board_row <= WINDOW[17:13]) ) 
+			&& ( (board_col >= WINDOW[12:9]) && (board_col <= WINDOW[8:5]) ) ) begin
+				piece_identifier = WINDOW[4:0];
+				piece_window_row = (WINDOW[17:13] <= 10) ? (3 - (WINDOW[17:13] - board_row)) : (board_row - WINDOW[22:18]);
+				piece_window_col = (WINDOW[12:9] <= 5) ? (WINDOW[8:5] - board_col) : (3 - (board_col - WINDOW[12:9]));
 			end	
 			
-			if (piece_block_template == 2'b11) begin
-				HW_ADDR = (row_0_addr + board_row);
-				HW_READ = 1'b1;
+			if (piece_block_template == BLACK) begin
 				unique case (board_col)
 					0 : board_block_template = HW_READDATA[1:0];
 					1 : board_block_template = HW_READDATA[3:2];
@@ -372,22 +416,22 @@ always_ff @ (posedge pixel_clk) begin
 		if (draw_board) begin
 		// -> Pixel is colored based on block templates and color palettes.
 			unique case (block_color_index)
-				2'b00 : begin
-					r <= 4'h0;
-					g <= 4'h0;
-					b <= 4'h0;
+				BLACK : begin
+					r <= 4'b0000;
+					g <= 4'b0000;
+					b <= 4'b0000;
 				end
-				2'b01 : begin
-					r <= LOCAL_REGS[palette_index][12:9];
-					g <= LOCAL_REGS[palette_index][8:5];
-					b <= LOCAL_REGS[palette_index][4:1];
+				DARK : begin
+					r <= PALETTE[12:9];
+					g <= PALETTE[8:5];
+					b <= PALETTE[4:1];
 				end
-				2'b10 : begin
-					r <= LOCAL_REGS[palette_index][24:21];
-					g <= LOCAL_REGS[palette_index][20:17];
-					b <= LOCAL_REGS[palette_index][16:13];
+				LIGHT : begin
+					r <= PALETTE[24:21];
+					g <= PALETTE[20:17];
+					b <= PALETTE[16:13];
 				end
-				2'b11 : begin
+				WHITE : begin
 					r <= 4'b1111;
 					g <= 4'b1111;
 					b <= 4'b1111;
@@ -396,9 +440,9 @@ always_ff @ (posedge pixel_clk) begin
 		end
 		else begin
 		// -> Black and white coloring.
-			r <= (onoroff) ? 4'b1111 : 4'h0 ;
-			g <= (onoroff) ? 4'b1111 : 4'h0 ;
-			b <= (onoroff) ? 4'b1111 : 4'h0 ;
+			r <= (onoroff) ? 4'b1111 : 4'b0000;
+			g <= (onoroff) ? 4'b1111 : 4'b0000;
+			b <= (onoroff) ? 4'b1111 : 4'b0000;
 		end
 	end
 end

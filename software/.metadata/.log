@@ -8436,3 +8436,477 @@ Caused by: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was STRING
 
 !ENTRY com.altera.sbtgui.launch 1 0 2021-11-26 13:32:53.816
 !MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-26 14:34:03.803
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-26 14:34:07.781
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 18:19:40.442
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 18:19:44.284
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY org.eclipse.cdt.ui 4 0 2021-11-28 19:50:29.677
+!MESSAGE Error in CDT UI during reconcile
+!STACK 1
+C Model Exception: C Model Status [Element vga.c does not exist.]
+	at org.eclipse.cdt.internal.core.model.CElement.newNotPresentException(CElement.java:484)
+	at org.eclipse.cdt.internal.core.model.TranslationUnit.makeConsistent(TranslationUnit.java:573)
+	at org.eclipse.cdt.internal.core.model.ReconcileWorkingCopyOperation.executeOperation(ReconcileWorkingCopyOperation.java:62)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.execute(CModelOperation.java:341)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.run(CModelOperation.java:607)
+	at org.eclipse.cdt.internal.core.model.CModelOperation.runOperation(CModelOperation.java:635)
+	at org.eclipse.cdt.internal.core.model.WorkingCopy.reconcile(WorkingCopy.java:362)
+	at org.eclipse.cdt.internal.ui.text.CReconcilingStrategy.reconcile(CReconcilingStrategy.java:78)
+	at org.eclipse.cdt.internal.ui.text.CReconcilingStrategy.reconcile(CReconcilingStrategy.java:63)
+	at org.eclipse.cdt.internal.ui.text.CompositeReconcilingStrategy.reconcile(CompositeReconcilingStrategy.java:87)
+	at org.eclipse.cdt.internal.ui.text.CCompositeReconcilingStrategy.reconcile(CCompositeReconcilingStrategy.java:90)
+	at org.eclipse.jface.text.reconciler.MonoReconciler.process(MonoReconciler.java:77)
+	at org.eclipse.cdt.internal.ui.text.CReconciler.process(CReconciler.java:349)
+	at org.eclipse.jface.text.reconciler.AbstractReconciler$BackgroundThread.run(AbstractReconciler.java:206)
+!SUBENTRY 1 org.eclipse.cdt.core 4 969 2021-11-28 19:50:29.679
+!MESSAGE Element vga.c does not exist.
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:34:32.177
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:34:35.067
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:37:36.847
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:37:39.626
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:41:51.502
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:41:54.227
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:43:16.506
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:43:17.434
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:43:20.116
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:47:33.100
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 21:47:35.876
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:14:56.350
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:14:59.155
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:16:35.313
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:16:38.112
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:17:23.870
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:17:26.606
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:18:50.732
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:18:53.416
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:22:44.070
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:22:46.808
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:31:21.310
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:31:24.055
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:33:05.554
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:33:08.400
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:37:10.488
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:37:13.247
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:38:48.113
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:38:51.014
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:41:46.530
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:41:49.289
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:42:31.608
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:42:34.296
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:43:42.106
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:43:43.106
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:43:45.877
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:44:18.317
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:44:21.205
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:44:56.940
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:44:59.817
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:47:06.097
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:47:08.830
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:47:58.275
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 22:48:01.111
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 23:30:57.816
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 23:31:00.503
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 23:47:16.987
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-28 23:47:19.722
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 00:25:37.675
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 00:25:40.412
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:03:35.487
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:03:38.349
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:04:36.990
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:04:37.960
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:04:40.742
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:09:27.545
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:09:30.418
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:09:49.089
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:09:50.050
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:09:52.743
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:11:17.998
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:11:20.833
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:12:54.880
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:12:55.837
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:12:58.628
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:36:44.924
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:36:47.661
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:07.476
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:08.475
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:11.318
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:29.817
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:30.804
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:33.568
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:52.723
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:53.665
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:37:56.412
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:38:13.523
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:38:14.479
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:38:17.231
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:26.616
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:29.324
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:38.431
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:39.386
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:42.236
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:52.236
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:53.220
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:49:55.917
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:50:04.565
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:50:05.565
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 01:50:08.395
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:15.644
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:18.377
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:35.822
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:36.767
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:39.427
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:53.326
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:54.238
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:49:56.959
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:07.372
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:08.366
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:11.207
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:19.952
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:20.928
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 10:50:23.741
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:04:25.466
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:04:28.422
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:04:49.912
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:04:50.921
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:04:53.926
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:05:56.882
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:05:57.913
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:06:00.794
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:06:38.592
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:06:41.459
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:07:43.855
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:07:44.890
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:07:47.905
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:08:30.226
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:08:31.261
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:08:34.277
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:09:11.208
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:09:14.307
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:23:58.289
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:24:01.120
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:24:26.070
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 21:24:28.918
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 22:48:56.069
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 22:48:59.020
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 23:44:51.390
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 23:44:54.368
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 23:57:37.286
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-29 23:57:40.292
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:26:20.771
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:26:23.708
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:26:37.202
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:26:38.134
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:26:40.982
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:44:36.025
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:44:38.771
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:44:54.003
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:44:56.831
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:10.068
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:11.022
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:13.858
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:23.971
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:24.926
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --accept-bad-sysid --sidp=0x1e0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2021-11-30 05:45:27.743
+!MESSAGE Executing: [C:/intelfpga_lite/18.0/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --accept-bad-sysid --sidp=0x1e0 /cygdrive/c/intelFPGA_lite/18.0/SOC/software/nes_tetris/nes_tetris.elf]

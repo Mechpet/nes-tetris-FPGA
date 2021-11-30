@@ -1,0 +1,765 @@
+/*
+ * vga.c
+ * Based on Zuofu Cheng's text_mode_vga_color.c
+ *  Created on: Nov 17, 2021
+ *      Author: thoms
+ */
+
+#include <system.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <alt_types.h>
+#include "vga.h"
+
+/** vga_clear
+ * Parameters: None.
+ *
+ * Description: Clear out the memory associated with the
+ * VGA controller component.
+ *
+ * Expected behavior: Line, level, and current score are reset.
+ */
+void vga_clear() {
+	vga_ctrl->LEVEL_LINES = 0x00000000;
+	vga_ctrl->SCORE	 	  = 0x00000000;
+	for (int i = 0; i < BOARD_ROWS; i++) {
+		vga_ctrl->BOARD[i] = 0x00000000;
+	}
+	vga_ctrl->NEXT = 0x00000000;
+	for (int i = 0; i < RESERVE_LENGTH; i++) {
+		vga_ctrl->RESERVED[i]	  = 0x00000000;
+	}
+	vga_ctrl->PALETTE 	  = 0x00000000;
+	vga_ctrl->WINDOW	  = 0x00000000;
+}
+
+/** increase_level
+ * Parameters: None.
+ *
+ * Description: Increment the current level.
+ *
+ * Expected behavior: Level increases by 1 and no hexadecimal digits are displayed on VGA.
+ */
+void increase_level() {
+	alt_u32 decimal_mask = 0xFFFF0000;
+	alt_u32 nine_mask = 0x00090000;
+	alt_u32 lines_mask 	 = 0x0000FFFF;
+	alt_u32 curr_lines   = vga_ctrl->LEVEL_LINES & lines_mask;
+
+	int zeroth_bit = 16, third_bit = 18;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1 + curr_lines);
+			break;
+		}
+	}
+}
+
+/** step_lines
+ * Parameters:
+ * @step = Number of lines to add to the current line count.
+ *
+ * Description: Step the current line count by a parameter amount.
+ *
+ * Expected behavior: Line count increases by the parameter amount and no hexadecimal digits are displayed on VGA.
+ */
+void step_lines(alt_u8 step) {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 BCD_mask = 0x0000000F;
+	alt_u32 max_BCD = 9 - step;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if (decimal_mask == 0xFFFF0000) {
+			// Signifies `line count` overflow.
+			break;
+		}
+		if ( (vga_ctrl->LEVEL_LINES & BCD_mask) > max_BCD) {
+			decimal_mask <<= 4;
+			BCD_mask <<= 4;
+			max_BCD <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + step);
+			break;
+		}
+	}
+}
+
+// Dark = Color index 1
+// Light = Color index 2
+void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 new_red2, alt_u8 new_green2, alt_u8 new_blue2) {
+	vga_ctrl->PALETTE &= 0x00000000;
+
+	vga_ctrl->PALETTE |= new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1;
+	printf("Palette = %x\n", new_red2 << 21 | new_green2 << 17 | new_blue2 << 13 | new_red1 << 9 | new_green1 << 5 | new_blue1 << 1);
+}
+
+/** test_inc_level_line_values
+ * Parameters: None.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases (still has alphabet), then the level increases (still has alphabet).
+ */
+void test_inc_level_line_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->LEVEL_LINES & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->LEVEL_LINES &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->LEVEL_LINES += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+/** test_inc_level_line_values
+ * Parameters:
+ * @step = Step increment to the memory per cycle.
+ *
+ * Description: Testing of incrementing the memory associated with
+ * level value and line count.
+ *
+ * Expected behavior: Line increases, then the level increases.
+ */
+void test_score_values() {
+	alt_u32 decimal_mask = 0xFFFFFFFF;
+	alt_u32 nine_mask = 0x00000009;
+
+	int zeroth_bit = 0, third_bit = 3;
+	while (1) {
+		if ( (vga_ctrl->SCORE & nine_mask) == nine_mask) {
+			decimal_mask <<= 4;
+			nine_mask <<= 4;
+			vga_ctrl->SCORE &= decimal_mask;
+			zeroth_bit += 4;
+			third_bit += 4;
+		}
+		else {
+			vga_ctrl->SCORE += (~decimal_mask + 1);
+			break;
+		}
+	}
+}
+
+/** test_board_values
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the board values.
+ *
+ * Expected behavior: Random blocks appear in the board per row.
+ * There should be 4 visible types of blocks that appear (i.e. the templates).
+ */
+void test_board_values() {
+	for (int i = 0; i < BOARD_ROWS; i++) {
+		vga_ctrl->BOARD[i] = rand() % ROW_10_MASK;
+	}
+}
+
+/** test_next_piece
+ * Parameters: None.
+ *
+ * Description: Testing of randomizing the next tetromino piece.
+ *
+ * Expected behavior: Random tetromino pieces appear in the next block window.
+ * The tetromino pieces should be centered in the window in their initial orientations.
+ */
+void test_next_piece() {
+	alt_u32 next_piece_id = rand() % 0x00000007;
+	vga_ctrl->NEXT = next_piece_id << 2;
+	printf("Next piece was %x\n.", next_piece_id);
+}
+
+/*
+ * ([22:18] Window align top : 0
+ * | [17:13] Window align bottom : 1
+ * | [12:9] Window align left : 3
+ * | [8:5] Window align right : 6
+ * | [4:2] Current piece identifier : random
+ * | [1:0] Current piece rotation identifier : 2'b00
+ */
+void test_spawn_current_piece() {
+	alt_u32 current_piece_id = rand() % 0x00000007, active0, active1;
+	alt_u32 clear_mask = ROW_10_MASK;
+	// Vertical alignment
+	vga_ctrl->WINDOW = (current_piece_id << 2 | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+	switch (current_piece_id) {
+		case (0x00000000):
+			active0 = active1 = 0x06000000;
+			break;
+		case (0x00000001):
+			active0 = 0x0F000000;
+			active1 = 0x00000000;
+			break;
+		case (0x00000002):
+			active0 = 0x06000000;
+			active1 = 0x0C000000;
+			break;
+		case (0x00000003):
+			active0 = 0x0C000000;
+			active1 = 0x06000000;
+			break;
+		case (0x00000004):
+			active0 = 0x0E000000;
+			active1 = 0x04000000;
+			break;
+		case (0x00000005):
+			active0 = 0x0E000000;
+			active1 = 0x08000000;
+			break;
+		case (0x00000006):
+			active0 = 0x0E000000;
+			active1 = 0x02000000;
+			break;
+	}
+	vga_ctrl->BOARD[0] &= clear_mask;
+	vga_ctrl->BOARD[0] |= active0;
+	vga_ctrl->BOARD[1] &= clear_mask;
+	vga_ctrl->BOARD[1] |= active1;
+	printf("WINDOW is %x\n", vga_ctrl->WINDOW);
+}
+
+void initial_spawn_piece() {
+	// Spawn the current piece and the next piece.
+	alt_u32 current_piece_id = 0, active0, active1;
+	vga_ctrl->WINDOW = (rand() % 0x00000007 << 2 | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+
+	/*switch (current_piece_id) {
+		case (0x00000000):
+			active0 = active1 = 0x06000000;
+			break;
+		case (0x00000001):
+			active0 = 0x0F000000;
+			active1 = 0x00000000;
+			break;
+		case (0x00000002):
+			active0 = 0x06000000;
+			active1 = 0x0C000000;
+			break;
+		case (0x00000003):
+			active0 = 0x0C000000;
+			active1 = 0x06000000;
+			break;
+		case (0x00000004):
+			active0 = 0x0E000000;
+			active1 = 0x04000000;
+			break;
+		case (0x00000005):
+			active0 = 0x0E000000;
+			active1 = 0x08000000;
+			break;
+		case (0x00000006):
+			active0 = 0x0E000000;
+			active1 = 0x02000000;
+			break;
+	}
+	vga_ctrl->BOARD[0] |= active0;
+	vga_ctrl->BOARD[1] |= active1;*/
+	spawn_next_piece();
+	printf("WINDOW is %x\n", vga_ctrl->WINDOW);
+}
+
+void spawn_next_piece() {
+	alt_u32 next_piece_id = rand() % 0x00000007;
+	vga_ctrl->NEXT = next_piece_id << 2;
+}
+
+void fetch_next_piece() {
+	vga_ctrl->WINDOW = (vga_ctrl->NEXT | 0x00000006 << 5 | 0x00000003 << 9 | 0x00000001 << 13);
+
+	spawn_next_piece();
+}
+
+// Should be generic checks for legality.
+// Check if the dropped world is legal - if so, don't fetch the next piece and drop the current piece.
+// If the dropped world is not legal, set the current world as the new world and fetch the next piece.
+void drop_curr_piece() {
+	alt_u32 inc = 0x00000001;
+	alt_u32 piece_identifier = vga_ctrl->WINDOW & 0x0000001F;
+	alt_u32 top_window = vga_ctrl->WINDOW & 0x007C0000;
+	alt_u32 bottom_window = vga_ctrl->WINDOW & 0x0003E000;
+
+	// Current orientation and position of the piece.
+	struct piece curr_piece = assemble_piece(vga_ctrl->WINDOW);
+
+	// Supposed orientation and position of the piece if it dropped one block.
+	struct piece next_piece = curr_piece;
+	for (unsigned i = 0; i < 4; i++) {
+		next_piece.row[i]++;
+	}
+
+	if (!is_legal_world(curr_piece)) {
+		// Game Over
+		printf("Game.\n");
+		game_over_sequence();
+	}
+	else if (is_legal_world(next_piece)) {
+		printf("Is a legal world.\n");
+		alt_u32 bottom_inc = 0x00002000;
+		alt_u32 top_inc = (bottom_window >= 0x00006000) ? inc << 18 : 0;
+
+		vga_ctrl->WINDOW += (bottom_inc | top_inc);
+	}
+	else {
+		printf("Fix the piece on the board.\n");
+		fill_board(curr_piece);
+		fetch_next_piece();
+	}
+
+	/*
+	switch (my_piece.id) {
+		case 0b00000:
+			if (my_piece.row[3] == BOARD_BOTTOM) {
+				vga_ctrl->BOARD[18] |= (WHITE_MASK << my_piece.col[0] | WHITE_MASK << my_piece.col[1]);
+				vga_ctrl->BOARD[19] |= (WHITE_MASK << my_piece.col[2] | WHITE_MASK << my_piece.col[3]);
+				printf("WHITE_MASK << my_piece.col[2] = %x\n", WHITE_MASK << my_piece.col[2]);
+				printf("WHITE_MASK << my_piece.col[3] = %x\n", WHITE_MASK << my_piece.col[3]);
+				printf("(WHITE_MASK << my_piece.col[2] | WHITE_MASK << my_piece.col[3]) = %x\n", (WHITE_MASK << my_piece.col[2] | WHITE_MASK << my_piece.col[3]));
+				fetch_next_piece();
+			}
+			// Check if there is a block on the board in the way.
+			else {
+
+				alt_u32 underneath = vga_ctrl->BOARD[my_piece.row[2] + 1];
+				if (underneath & (ROW_2_MASK << my_piece.col[2])) {
+					// If there is a non-black block beneath the 'O' piece:
+					vga_ctrl->BOARD[my_piece.row[2]] |= (WHITE_MASK << my_piece.col[2] | WHITE_MASK << my_piece.col[3]);
+					vga_ctrl->BOARD[my_piece.row[0]] |= (WHITE_MASK << my_piece.col[0] | WHITE_MASK << my_piece.col[1]);
+					fetch_next_piece();
+				}
+			}
+			break;
+	}*/
+	// Check for if the bottom of the piece is directly above the bottom of the board.
+
+	// Else, just drop the piece.
+}
+
+void fill_board(struct piece curr_piece) {
+	alt_u8 template_block;
+	switch (curr_piece.type) {
+		case O_PIECE: case I_PIECE: case T_PIECE:
+			template_block = WHITE_MASK;
+			break;
+		case Z_PIECE: case L_PIECE:
+			template_block = LIGHT_MASK;
+			break;
+		case S_PIECE: case J_PIECE:
+			template_block = DARK_MASK;
+			break;
+	}
+	for (unsigned block = 0; block < 4; block++) {
+		vga_ctrl->BOARD[curr_piece.row[block]] |= template_block << curr_piece.col[block];
+	}
+}
+
+// Check if a DROP (increment in row), ROTATION (change in orient), or SHIFT (change in col) is valid.
+enum bool is_legal_world(struct piece new_piece) {
+	// If any checks fail, return `FALSE`. Return `TRUE` at the end of the function.
+	// Check if the new piece is within the boundaries of the board.
+	for (unsigned block = 0; block < 4; block++) {
+		if (new_piece.row[block] < 0 || new_piece.row[block] > 19 || new_piece.col[block] < 0 || new_piece.col[block] > 18) {
+			printf("Piece is out of bounds.\n");
+			return FALSE;
+		}
+
+		// Check if the new piece does not collide with another block on the board.
+		alt_u32 board_block_data = vga_ctrl->BOARD[new_piece.row[block]] & (ROW_1_MASK << new_piece.col[block]);
+		if (board_block_data) {
+			printf("Piece conflicts with the board.\n");
+			return FALSE;
+		}
+	}
+
+	// Passed all checks for `FALSE` legality.
+	return TRUE;
+}
+
+// Should be hard-coded generation of the structures.
+/* piece:
+ * 	  row in [0, 19]
+ *    col in [0, 18] multiples of 2 {0, 2, 4, 6, 8, 10, 12, 14, 16, 18}
+ *
+ */
+struct piece assemble_piece(alt_u32 piece_memory) {
+	struct piece return_piece;
+
+	// Need to check for edge cases.
+
+	// Obtain the fields from the WINDOW memory.
+	return_piece.type = (piece_memory & 0x0000001C) >> 2;
+	return_piece.orient = (piece_memory & 0x00000003);
+	alt_u32 top_window = (piece_memory & 0x007C0000) >> 18;
+	alt_u32 bottom_window = (piece_memory & 0x0003E000) >> 13;
+	alt_u32 left_window = (piece_memory & 0x00001E00) >> 9;
+	alt_u32 right_window = (piece_memory & 0x000001E0) >> 5;
+
+	alt_u8 left_col, right_col, bottom_row;
+
+	switch (return_piece.type) {
+		case O_PIECE:
+			// 'O' piece
+			// 0 1
+			// 2 3
+			/* bottom_row = (if the piece is touching the bottom of the board -> the bottom of the window) (else it is levitating one above the bottom of the window every time)*/
+			bottom_row = bottom_window;
+			left_col = (right_window == 2) ? left_window : (left_window + 1);
+			right_col = (left_window == 7) ? right_window : (right_window - 1);
+			return_piece.col[0] = return_piece.col[2] = left_col;
+			return_piece.row[0] = return_piece.row[1] = bottom_row - 1;
+			return_piece.col[1] = return_piece.col[3] = right_col;
+			return_piece.row[2] = return_piece.row[3] = bottom_row;
+			printf("Bottom row = %d\n", bottom_row);
+			break;
+		case I_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL: case INITIAL_FLIPPED:
+					// 'I' piece flat
+					// 0 1 2 3
+					bottom_row = bottom_window - 1;
+					left_col = left_window;
+					right_col = right_window;
+					for (int i = 0; i < 4; i++) {
+						return_piece.col[i] = left_window + i;
+						return_piece.row[i] = bottom_row;
+					}
+					printf("The coordinates of the piece are:\n");
+					for (int i = 0; i < 4; i++) {
+						printf("(%d,%d)\n", return_piece.col[i], return_piece.row[i]);
+					}
+					break;
+				case CW: case CCW:
+					// 'I' piece vertical (say right_col is the sole column)
+					// 0
+					// 1
+					// 2
+					// 3
+					bottom_row = bottom_window;
+					if (left_window == 7) {
+						right_col = right_window;
+					}
+					else {
+						right_col = right_window - 1;
+					}
+					for (int i = 0; i < 4; i++) {
+						return_piece.col[i] = right_col;
+						return_piece.row[i] = bottom_row - (3 - i);
+					}
+					break;
+			}
+			break;
+		case Z_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL: case INITIAL_FLIPPED:
+					// 'Z' piece flat
+					// 0 1
+					//   2 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = right_window - 2;
+					return_piece.col[1] = return_piece.col[2] = right_window - 1;
+					return_piece.col[3] = right_window;
+
+					return_piece.row[0] = return_piece.row[1] = bottom_row - 1;
+					return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case CW: case CCW:
+					// 'Z' piece rotated
+					//   0
+					// 1 2
+					// 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[2] = right_window;
+					return_piece.col[1] = return_piece.col[3] = right_window - 1;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+			}
+			break;
+		case S_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL: case INITIAL_FLIPPED:
+					// 'S' piece flat
+					//   0 1
+					// 2 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[3] = right_window - 1;
+					return_piece.col[1] = right_window;
+					return_piece.col[2] = right_window - 2;
+
+					return_piece.row[0] = return_piece.row[1] = bottom_row - 1;
+					return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case CW: case CCW:
+					// 'S' piece rotated
+					// 0
+					// 1 2
+					//   3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[1] = right_window - 1;
+					return_piece.col[2] = return_piece.col[3] = right_window;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+			}
+			break;
+		case T_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL:
+					// 'T' piece
+					// 0 1 2
+					//   3
+					bottom_row = bottom_window;
+					return_piece.col[0] = right_window - 2;
+					return_piece.col[1] = return_piece.col[3] = right_window - 1;
+					return_piece.col[2] = right_window;
+
+					return_piece.row[0] = return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+				case CW:
+					//   0
+					// 1 2
+					//   3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[2] = return_piece.col[3] = right_window;
+					return_piece.col[1] = right_window - 1;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+				case INITIAL_FLIPPED:
+					//   0
+					// 1 2 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[2] = right_window - 1;
+					return_piece.col[1] = right_window - 2;
+					return_piece.col[3] = right_window;
+
+					return_piece.row[0] = bottom_row - 1;
+					return_piece.row[1] = return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case CCW:
+					// 0
+					// 1 2
+					// 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[1] = return_piece.col[3] = right_window - 2;
+					return_piece.col[2] = right_window;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+			}
+			break;
+		case J_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL:
+					// 0 1 2
+					//     3
+					bottom_row = bottom_window;
+					return_piece.col[0] = right_window - 2;
+					return_piece.col[1] = right_window - 1;
+					return_piece.col[2] = return_piece.col[3] = right_window;
+
+					return_piece.row[0] = return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+				case CW:
+					//   0
+					//   1
+					// 2 3
+					bottom_row = bottom_window;
+					if (left_window == 7) {
+						right_col = right_window;
+					}
+					else {
+						right_col = right_window - 1;
+					}
+					return_piece.col[0] = return_piece.col[1] = return_piece.col[3] = right_col;
+					return_piece.col[2] = right_col - 1;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = bottom_row - 1;
+					return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case INITIAL_FLIPPED:
+					// 0
+					// 1 2 3
+					bottom_row = bottom_window;
+
+					return_piece.col[0] = return_piece.col[1] = right_window - 2;
+					return_piece.col[2] = right_window - 1;
+					return_piece.col[3] = right_window;
+
+					return_piece.row[0] = bottom_row - 1;
+					return_piece.row[1] = return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case CCW:
+					// 0 1
+					// 2
+					// 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[2] = return_piece.col[3] = right_window - 1;
+					return_piece.col[1] = right_window;
+
+					return_piece.row[0] = return_piece.row[1] = bottom_row - 2;
+					return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+			}
+			break;
+		case L_PIECE:
+			switch (return_piece.orient) {
+				case INITIAL:
+					// 0 1 2
+					// 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[3] = right_window - 2;
+					return_piece.col[1] = right_window - 1;
+					return_piece.col[2] = right_window;
+
+					return_piece.row[0] = return_piece.row[1] = return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+
+					break;
+				case CW:
+					// 0 1
+					//   2
+					//   3
+					bottom_row = bottom_window;
+					if (left_window == 7) {
+						right_col = right_window;
+					}
+					else {
+						right_col = right_window - 1;
+					}
+					return_piece.col[0] = right_col - 1;
+					return_piece.col[1] = return_piece.col[2] = return_piece.col[3] = right_col;
+
+					return_piece.row[0] = return_piece.row[1] = bottom_row - 2;
+					return_piece.row[2] = bottom_row - 1;
+					return_piece.row[3] = bottom_row;
+					break;
+				case INITIAL_FLIPPED:
+					//     0
+					// 1 2 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[3] = right_window;
+					return_piece.col[1] = right_window - 2;
+					return_piece.col[2] = right_window - 1;
+
+					return_piece.row[0] = bottom_row - 1;
+					return_piece.row[1] = return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+				case CCW:
+					// 0
+					// 1
+					// 2 3
+					bottom_row = bottom_window;
+					return_piece.col[0] = return_piece.col[1] = return_piece.col[2] = right_window - 1;
+					return_piece.col[3] = right_window;
+
+					return_piece.row[0] = bottom_row - 2;
+					return_piece.row[1] = bottom_row - 1;
+					return_piece.row[2] = return_piece.row[3] = bottom_row;
+					break;
+			}
+			break;
+	}
+
+	for (int i = 0; i < 4; i++) {
+		return_piece.col[i] *= 2;
+	}
+
+	return return_piece;
+}
+
+void game_over_sequence() {
+	for (unsigned i = 0; i < 20; i++) {
+		if (vga_ctrl->BOARD[i] | GAMEOVER_MASK) {
+			continue;
+		}
+		else {
+			vga_ctrl->BOARD[i] |= GAMEOVER_MASK;
+		}
+	}
+}
+
+int main() {
+	vga_clear();
+	// dark = red, light = green
+	set_palette(colors[4].red, colors[4].green, colors[4].blue, colors[2].red, colors[2].green, colors[2].blue);
+	usleep(1000);
+	alt_u32 counter = 0;
+	usleep(1000);
+	int game_overing = 0;
+	int step = 5000;
+
+	initial_spawn_piece();
+
+		/*
+	struct piece my_piece = assemble_piece(vga_ctrl->WINDOW);
+	for (int i = 0; i < 4; i++) {
+		printf("(%d,%d)\n", my_piece.col[i], my_piece.row[i]);
+	}
+	printf("ID = %d\n", my_piece.id);
+	return 0;*/
+	while (1) {
+
+		/*
+		if (counter % step == 0) {
+			if (game_overing || counter % 50000 == 0) {
+				//vga_ctrl->BOARD[game_overing] |= 0x00100000;
+				game_overing++;
+				step = 100;
+				if (game_overing == 20) {
+					game_overing = 0;
+					step = 5000;
+				}
+			}
+			else {
+				//test_board_values();
+				test_spawn_current_piece();
+				test_next_piece();
+			//}
+		}
+		if (counter % 10 == 0) {
+			test_inc_level_line_values();
+		}
+		if (counter % 30 == 0) {
+			test_score_values();
+		}*/
+		if (counter % 2000 == 0) {
+			drop_curr_piece();
+		}
+		counter++;
+	}
+	return 0;
+}

@@ -15,9 +15,11 @@
 #define RESERVE_LENGTH 2025
 
 
+#define BOARD_ROWS 20
+#define BOARD_COLS 10
 
-
-#define BOARD_BOTTOM 0x13
+#define BOARD_TOP 0
+#define BOARD_BOTTOM 19
 #define BOARD_LEFT_EDGE 0
 #define BOARD_RIGHT_EDGE 9
 
@@ -26,9 +28,25 @@
 #define LIGHT_MASK 0b10
 #define DARK_MASK 0b01
 #define BLACK_MASK 0b00
-#define ROW_1_MASK 0h00003;	// Row single block mask
-#define ROW_2_MASK 0h0000F; // Row double adjacent block mask
-#define ROW_4_MASK 0h000FF; // Row quadruple adjacent block mask
+#define ROW_1_MASK 0x00003	// Row 1 block mask
+#define ROW_2_MASK 0x0000F // Row 2 adjacent blocks mask
+#define ROW_4_MASK 0x000FF // Row 4 adjacent blocks mask
+#define ROW_10_MASK 0x000FFFFF // Row 10 adjacent blocks mask
+#define GAMEOVER_MASK 0x00100000
+
+#define O_PIECE 0
+#define I_PIECE 1
+#define Z_PIECE 2
+#define S_PIECE 3
+#define T_PIECE 4
+#define J_PIECE 5
+#define L_PIECE 6
+#define INITIAL 0
+#define CW 1
+#define INITIAL_FLIPPED 2
+#define CCW 3
+
+#define TEST_PIECE O_PIECE
 
 struct VGA_STRUCT {
 	alt_u32 LEVEL_LINES;
@@ -38,10 +56,15 @@ struct VGA_STRUCT {
 	alt_u32 RESERVED[RESERVE_LENGTH];
 	alt_u32 PALETTE;
 	alt_u32 WINDOW;
+	alt_u32 SEED;
 };
 
 static volatile struct VGA_STRUCT *vga_ctrl = VGA_CONTROLLER_0_BASE;
 
+enum bool {
+	FALSE,
+	TRUE,
+};
 
 struct COLOR{
 	char name [20];
@@ -51,9 +74,10 @@ struct COLOR{
 };
 
 struct piece {
-	alt_u8 row[4];
-	alt_u8 col[4];
-	unsigned id : 5;
+	int row[4];
+	int col[4];
+	unsigned type : 3;
+	unsigned orient : 2;
 };
 
 struct row {
@@ -87,7 +111,11 @@ void set_palette(alt_u8 new_red1, alt_u8 new_green1, alt_u8 new_blue1, alt_u8 ne
 void initial_spawn_piece();
 void fetch_next_piece();
 void spawn_next_piece();
+void drop_curr_piece();
 struct piece assemble_piece(alt_u32 piece_memory);
+enum bool is_legal_world(struct piece new_piece);
+void fill_board(struct piece curr_piece);
+void game_over_sequence();
 
 // Test category:
 void test_inc_level_line_values();
