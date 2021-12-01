@@ -5,7 +5,7 @@
 <stringAttribute key="byteStreamDeviceCableName" value="USB-Blaster on localhost [USB-0]"/>
 <stringAttribute key="byteStreamDeviceDeviceID" value="1"/>
 <stringAttribute key="byteStreamDeviceInstanceID" value="0"/>
-<stringAttribute key="com.altera.sbtgui.launch.REMOTE_PORT" value="52660"/>
+<stringAttribute key="com.altera.sbtgui.launch.REMOTE_PORT" value="54257"/>
 <booleanAttribute key="downloadProgram" value="true"/>
 <stringAttribute key="elfFile" value="C:\intelFPGA_lite\18.0\SOC\software\nes_tetris\nes_tetris.elf"/>
 <stringAttribute key="org.eclipse.cdt.debug.mi.core.GDB_INIT" value=""/>

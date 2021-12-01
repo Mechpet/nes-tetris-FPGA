@@ -15,8 +15,9 @@ logic [31:0] AVL_WRITEDATA;
 logic [31:0] AVL_READDATA;	
 logic [4:0] random_out;
 logic random_bit, stop_bit;
-logic load;
+logic load, key_state;
 logic [31:0] seed, random_state;
+logic [7:0] key_data;
 
 vga_avl_interface VGA_INTERFACE(.CLK(Clk),
 	.RESET, .AVL_READ, .AVL_WRITE, .AVL_CS, .AVL_BYTE_EN, .AVL_ADDR, .AVL_WRITEDATA, 
@@ -31,6 +32,11 @@ hw_rng h(.clk(Clk),
 	.load(load),
 	.seed(seed),
 	.random_state(random_state));
+	
+key_handler kh(.clk(CLK),
+	.keycode(random_state[7:0]),
+	.key_data,
+	.key_state(key_state));
 	
 always begin : CLOCK_GENERATION
 #1 Clk = ~Clk;

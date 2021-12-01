@@ -6,6 +6,9 @@ Register Map:
 0x001 = [31:0] Score value
 0x002-0x015 = 0th row, 1st row, 2nd row, 3rd row, ..., 20th row
 0x016 = (for now) Next piece identifier
+0x017 = Keycodes
+0x018 = Key states 
+0x019 = DAS
 0x800 = Palette local register 
 0X801 = Current piece local register
 0x802 = Seed bit #1
@@ -55,7 +58,7 @@ r ram0(
 	.data_a(AVL_WRITEDATA),
 	.data_b(HW_WRITEDATA),
 	.wren_a(RAM_WRITE),
-	.wren_b(1'b0),
+	.wren_b(HW_WRITE),
 	.q_a(RAM_READDATA),
 	.q_b(HW_READDATA));
 
@@ -131,23 +134,6 @@ hw_rng rng3(.clk(CLK),
 assign red = r;
 assign green = g;
 assign blue = b;
-
-
-logic [31:0] seed;
-
-always_ff @ (posedge CLK) begin
-	if (RESET) begin
-		seed <= '{default:'0};
-	end
-	else begin
-		seed[0] <= pixel_clk;
-		seed[1] <= CLK;
-		seed[2] <= pixel_clk;
-		seed[3] <= ~CLK;
-		seed[4] <= ~pixel_clk;
-		seed[5] <= CLK;
-	end
-end
 
 always_ff @ (posedge CLK) begin
 	if (RESET) begin

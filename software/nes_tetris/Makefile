@@ -142,7 +142,10 @@ ACDS_VERSION := 18.0
 ELF := nes_tetris.elf
 
 # Paths to C, C++, and assembly source files.
-C_SRCS := vga.c
+C_SRCS += vga.c
+C_SRCS += usb_kb/HID.c
+C_SRCS += usb_kb/MAX3421E.c
+C_SRCS += usb_kb/transfer.c
 CXX_SRCS :=
 ASM_SRCS :=
 
