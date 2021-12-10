@@ -27,7 +27,11 @@ module nes_tetris_soc (
 	vga_port_green,
 	vga_port_blue,
 	vga_port_hs,
-	vga_port_vs);	
+	vga_port_vs,
+	i2c_serial_sda_in,
+	i2c_serial_scl_in,
+	i2c_serial_sda_oe,
+	i2c_serial_scl_oe);	
 
 	input		clk_clk;
 	output	[15:0]	hex_digits_export;
@@ -57,4 +61,8 @@ module nes_tetris_soc (
 	output	[3:0]	vga_port_blue;
 	output		vga_port_hs;
 	output		vga_port_vs;
+	input		i2c_serial_sda_in;
+	input		i2c_serial_scl_in;
+	output		i2c_serial_sda_oe;
+	output		i2c_serial_scl_oe;
 endmodule

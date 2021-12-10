@@ -2,30 +2,28 @@
 Avalon-MM Interface VGA Text mode display
 
 Register Map:
-0x000-0x0257 : VRAM, 80x30 (2400 byte, 600 word) raster order (first column then row)
-0x258        : control register
-
-VRAM Format:
-X->
-[ 31  30-24][ 23  22-16][ 15  14-8 ][ 7    6-0 ]
-[IV3][CODE3][IV2][CODE2][IV1][CODE1][IV0][CODE0]
-
-IVn = Draw inverse glyph
-CODEn = Glyph code from IBM codepage 437
-
-Control Register Format:
-[[31-25][24-21][20-17][16-13][ 12-9][ 8-5 ][ 4-1 ][   0    ] 
-[[RSVD ][FGD_R][FGD_G][FGD_B][BKG_R][BKG_G][BKG_B][RESERVED]
-
-VSYNC signal = bit which flips on every Vsync (time for new frame), used to synchronize software
-BKG_R/G/B = Background color, flipped with foreground when IVn bit is set
-FGD_R/G/B = Foreground color, flipped with background when Inv bit is set
+0x000 = [31:16] Level number, [15:0] Line count
+0x001 = [31:0] Score value
+0x002-0x015 = 0th row, 1st row, 2nd row, 3rd row, ..., 20th row
+0x016 = (for now) Next piece identifier
+0x017 = Frame counter (increments infinitely per working frame)
+0x018 = Delay counter (increments when stalling)
+0x019 = # of Lines cleared (range is 0 to 4)
+0x01A = Level screen select counter
+0x01B = Level hovered
+0x01C = Game over line counter
+0x800 = Palette local register 
+0X801 = Current piece local register
+0x802 = Seed bit #1
+0x803 = Assertion bits
 
 ************************************************************************/
 import my_pkg::*;
+import template_pkg::*;
 module vga_avl_interface (
-	// Avalon Clock Input, note this clock is also used for VGA, so this must be 50Mhz
-	// We can put a clock divider here in the future to make this IP more generalizable
+
+	input logic [7:0] keycode, 
+	
 	input logic CLK,
 	
 	// Avalon Reset Input
@@ -40,132 +38,1331 @@ module vga_avl_interface (
 	input  logic [31:0] AVL_WRITEDATA,		// Avalon-MM Write Data
 	output logic [31:0] AVL_READDATA,		// Avalon-MM Read Data
 	
-	// Exported Conduit (mapped to VGA port - make sure you export in Platform Designer)
 	output logic [3:0]  red, green, blue,	// VGA color channels (mapped to output pins in top-level)
 	output logic hs, vs						// VGA HS/VS
 );
 
-logic RAM_WRITE;
-assign RAM_WRITE = AVL_WRITE & ~AVL_ADDR[11];
+logic RAM_READ, RAM_WRITE, HW_WRITE, HW_READ;
+assign RAM_READ = AVL_READ & ~AVL_ADDR[11] & AVL_CS;
+assign RAM_WRITE = AVL_WRITE & ~AVL_ADDR[11] & AVL_CS;
 
-logic [11:0] AVL_READADDR;
-logic [31:0] RAM_READDATA, PALETTE_READDATA;
+logic [31:0] LOCAL_REGS [4:0];
+logic [10:0] HW_ADDR;
+logic [31:0] PALETTE, WINDOW, ASSERTION, DROP_INTERVAL, HW_WRITEDATA, HW_READDATA;
+logic [31:0] RAM_READDATA, LOCAL_READDATA;
+logic ASSERT_CLEAR;
+logic [2:0] ROWS_CLEARED;
 
-assign AVL_READDATA = (AVL_ADDR[11]) ? PALETTE_READDATA : RAM_READDATA;
+assign ASSERTION = LOCAL_REGS[assertion_index];
+assign ASSERT_CLEAR = ASSERTION[0];	// In the clear animation
+assign ASSERT_LEVEL = ASSERTION[1];	// On the level select menu
 
-/*
-byte_enabled_simple_dual_port_ram ram0
-(
- .we(RAM_WRITE), 
- .clk(CLK),
- .waddr(AVL_ADDR[10:0]),
- .raddr(AVL_READADDR),
- .be(AVL_BYTE_EN),
- .wdata(AVL_WRITEDATA),
- .q(RAM_READDATA)
-);*/
-ram ram0
-(.byteena_a(AVL_BYTE_EN),
+assign DROP_INTERVAL = LOCAL_REGS[interval_index];
+assign AVL_READDATA = (AVL_ADDR[11]) ? LOCAL_READDATA : RAM_READDATA;
+assign PALETTE = LOCAL_REGS[palette_index];
+assign WINDOW = LOCAL_REGS[window_index];
+
+// A = AVL access
+// B = Hardware access
+r ram0(
+	.address_a(AVL_ADDR[10:0]),
+	.address_b(HW_ADDR),
+	.byteena_a(AVL_BYTE_EN),
 	.clock(CLK),
-	.data(AVL_WRITEDATA),
-	.rdaddress(AVL_READADDR),
-	.wraddress(AVL_ADDR[10:0]),
-	.wren(RAM_WRITE),
-	.q(RAM_READDATA));
+	.data_a(AVL_WRITEDATA),
+	.data_b(HW_WRITEDATA),
+	.wren_a(RAM_WRITE),
+	.wren_b(HW_WRITE),
+	.q_a(RAM_READDATA),
+	.q_b(HW_READDATA));
 
-logic [31:0] PALETTE [7:0]; // Palette register data
+logic pixel_clk, blank, sync, onoroff;
 
-//put other local variables here
-// `onoroff` refers to whether a pixel at (DrawX, DrawY) on the VGA should be background (0) or foreground (1)
-// `inv` refers to whether a pixel at (DrawX, DrawY) was inverted
-// `bit_index` refers to the bit position/index in the ASCII 8-bit data (0 -> bit at data[0])
-// `char_index` refers to the character position/index in the registers (0 -> data at register[7:0])
-// `row` refers to the row of the character to be displayed (0 -> left of VGA)
-// `col` refers to the column of the character to be displayed (0 -> top of VGA)
-logic pixel_clk, blank, sync, onoroff, inv, Increment;
-logic [2:0] bit_index, char_index;
+// VGA Draw flags:
+logic draw_board, draw_next, draw_piece, draw_window, game_over;
+
+
+logic [1:0] resultant_block_template, board_block_template, block_color_index, piece_block_template;
+assign resultant_block_template = (draw_piece) ? piece_block_template : board_block_template;
+
+logic [2:0] piece_window_col, piece_window_row;
+logic [3:0] map [3:0];
+
+logic [3:0] bit_index, block_pixel_col, block_pixel_row, pixel_x;
 logic [6:0] row, col;
-logic [11:0] reg_index;
-logic [9:0] DrawX, DrawY;
-logic bg_bit, fg_bit;
-logic [3:0] palette_bg_index, palette_fg_index, palette_bg_reg, palette_fg_reg, palette_addr;
-logic [3:0] r, b, g, br, bg, bb, fr, fg, fb;
+logic [9:0] DrawX, DrawY, displacedDrawX;
+assign displacedDrawX = DrawX - 8;
+
+logic [4:0] board_row;
+logic [3:0] board_col;
+
+logic [3:0] r, b, g, block_red, block_green, block_blue;
+logic [4:0] piece_identifier;
 
 // Font-related
 logic [9:0] addr;
-logic [7:0] data;
+logic [15:0] data;
+logic right_edge, bottom_edge;
+logic [1:0] left_edge, top_edge;
+logic [7:0] template_map;
+logic [31:0] random;
 	
-//Declare submodules..e.g. VGA controller, ROMS, etc
-vga_controller VGA_CONTROLLR(.Clk(CLK), .Reset(RESET), .hs(hs), .vs(vs), .pixel_clk(pixel_clk), .blank(blank), .sync(sync), .DrawX(DrawX), .DrawY(DrawY));
-font_rom FONT_ROM(.addr(addr), .data(data));
+vga_controller VGA_CONTROLLER(
+	.Clk(CLK), 
+	.Reset(RESET), 
+	.hs(hs), 
+	.vs(vs), 
+	.pixel_clk(pixel_clk), 
+	.blank(blank), 
+	.sync(sync), 
+	.DrawX(DrawX), 
+	.DrawY(DrawY));
+font_rom_upscaled FONT_ROM(
+	.addr(addr), 
+	.data(data));
+block_memory BLOCK_ROM(
+	.block_template(resultant_block_template),
+	.pixel_x(pixel_x),
+	.pixel_y(DrawY[3:0]),
+	.gameover(game_over),
+	.color_index(block_color_index));
+tetromino_rom TETROMINO_ROM(
+	.identifier(piece_identifier),
+	.col(piece_window_col),
+	.row(piece_window_row),
+	.left_edge(left_edge),
+	.right_edge(right_edge),
+	.top_edge(top_edge),
+	.bottom_edge(bottom_edge),
+	.block_template(piece_block_template),
+	.window_map(map),
+	.template_map(template_map));
+hw_rng rng(.clk(CLK),
+	.reset(RESET),
+	.load(1'b0),
+	.seed(32'h0),
+	.random_state(random));
 
 assign red = r;
 assign green = g;
 assign blue = b;
 
-// Read and write from AVL interface to register block, note that READ waitstate = 1, so this should be in always_ff
-always_ff @(posedge CLK) begin
-	if (RESET)
-		PALETTE <= '{default:'0};	// Reset all registers to 0
+logic [31:0] LOCAL_DATA;
+logic [2:0] LOCAL_ADDR;
+logic LOCAL_WRITE;
+always_ff @ (posedge CLK) begin
+	if (RESET) begin
+		LOCAL_REGS <= '{default:'0};
+	end
 	else
 	begin	
-	if (AVL_CS & AVL_ADDR[11])	// Chip-select indicates operation
+	if ( (AVL_CS & AVL_ADDR[11]) | LOCAL_WRITE)	// Chip-select indicates operation
 		begin
-			palette_addr <= AVL_ADDR - 12'h800;
 			// Assume that only one operation can be performed at a given time
-			if (AVL_WRITE)
-			begin
+			if (LOCAL_WRITE) begin
+				LOCAL_REGS[LOCAL_ADDR] <= LOCAL_DATA;
+			end
+			else if (AVL_WRITE) begin
 				unique case (AVL_BYTE_EN)	// Write a subset of the data at register[]
-					4'b1111 : PALETTE[palette_addr] <= AVL_WRITEDATA;
-					4'b1100 : PALETTE[palette_addr][31:16] <= AVL_WRITEDATA[31:16];
-					4'b0011 : PALETTE[palette_addr][15:0] <= AVL_WRITEDATA[15:0];
-					4'b1000 : PALETTE[palette_addr][31:24] <= AVL_WRITEDATA[31:24];
-					4'b0100 : PALETTE[palette_addr][23:16] <= AVL_WRITEDATA[23:16];
-					4'b0010 : PALETTE[palette_addr][15:8] <= AVL_WRITEDATA[15:8];
-					4'b0001 : PALETTE[palette_addr][7:0] <= AVL_WRITEDATA[7:0];
+					4'b1111 : LOCAL_REGS[AVL_ADDR - palette_addr] <= AVL_WRITEDATA;
+					4'b1100 : LOCAL_REGS[AVL_ADDR - palette_addr][31:16] <= AVL_WRITEDATA[31:16];
+					4'b0011 : LOCAL_REGS[AVL_ADDR - palette_addr][15:0] <= AVL_WRITEDATA[15:0];
+					4'b1000 : LOCAL_REGS[AVL_ADDR - palette_addr][31:24] <= AVL_WRITEDATA[31:24];
+					4'b0100 : LOCAL_REGS[AVL_ADDR - palette_addr][23:16] <= AVL_WRITEDATA[23:16];
+					4'b0010 : LOCAL_REGS[AVL_ADDR - palette_addr][15:8] <= AVL_WRITEDATA[15:8];
+					4'b0001 : LOCAL_REGS[AVL_ADDR - palette_addr][7:0] <= AVL_WRITEDATA[7:0];
 					default : ;
 				endcase
 			end
-			else if (AVL_READ)
-				PALETTE_READDATA <= PALETTE[palette_addr];
+			else if (AVL_READ) begin
+				if (AVL_ADDR == 12'h802) begin
+					LOCAL_READDATA <= random;
+				end
+				else begin
+					LOCAL_READDATA <= LOCAL_REGS[AVL_ADDR - palette_addr];
+				end
+			end
 		end
 	end
 end
 
-always_comb
-begin // Decode electron beam position
-		col = DrawX >> 3;
-		row = DrawY >> 3;
-		bit_index = ~DrawX[2:0];
-		if (row == score_label_row && (col >= score_label_left_col && col <= score_label_right_col))
-		begin //Fetch font data (LUT)
-			unique case (col)
-				68 : addr = start_S + DrawY[2:0]; // 'S'
-				69 : addr = start_C + DrawY[2:0]; // 'C'
-				70 : addr = start_O + DrawY[2:0]; // 'O'
-				71 : addr = start_R + DrawY[2:0]; // 'R'
-				72 : addr = start_E + DrawY[2:0]; // 'E'
-			endcase
+/* 
+State machine for level select menu:
+L_IDLE: Not running
+L_POS_EDGE: On rising edge of vertical sync
+L_COUNT: Increment the seed counter
+L_STEADY: No more operations but still in vertical sync
+*/
+logic transparent, next_transparent;
+logic [3:0] level_hovered, next_level_hovered;
+logic [31:0] level_drop_delay;
+enum logic [4:0] {L_IDLE, L_POS_EDGE, L_COUNT, L_HOVER, L_READ, L_STEADY} level_state;
+always_ff @ (posedge CLK) begin
+	if (RESET) begin
+		level_state <= L_IDLE;
+		transparent <= 0;
+	end
+	else begin
+		transparent <= next_transparent;
+		level_hovered <= next_level_hovered;
+		
+		if (!vs && level_state == L_IDLE && ASSERT_LEVEL) begin
+			level_state <= L_POS_EDGE;
+			transparent <= 0;
 		end
-		else
-			addr = 9'h2D * 8;
-		onoroff = data[bit_index];
+		else if (level_state == L_POS_EDGE) begin
+			level_state <= L_COUNT;
+		end
+		else if (level_state == L_COUNT) begin
+			level_state <= L_HOVER;
+		end
+		else if (level_state == L_HOVER) begin
+			level_state <= L_READ;
+		end
+		else if (level_state == L_READ) begin
+			level_state <= L_STEADY;
+		end
+		else if (vs && level_state == L_STEADY) begin
+			level_state <= L_IDLE;
+		end
+	end
 end
 
 
-//handle drawing (may either be combinational or sequential - or both).
+/*
+State machine for updating the board per frame :
+F_IDLE: Not running
+F_POS_EDGE: On rising edge of vertical sync
+F_COUNT: Increment the frame counter
+F_DROPi: Set-up for the F_DROP states
+F_DROP{n}: Update nth column of the current piece
+F_EXECUTE{n} Execute a potential fix or drop on the nth row
+F_MID{n}: Set-up for the F_EXECUTE{n + 1} state
+F_CLEAR{n}{i}: Clear the nth row of data on the ith iteration
+F_SHIFT_SELECTOR{z}: Select the zth row of data
+F_SHIFT_EXECUTE{z}: Shift the zth row of data downward to its proper position
+F_FETCH: Fetch the next piece the user controls
+F_LOAD: Load the random piece to the next piece (pseudo-random LFSR)
+F_GAMEOVER: Waiting for feedback to go back to level select
+F_STEADY: No more operations but still in vertical sync (implies logic is fast enough)
+*/
+logic drop_en, next_drop_en;
+logic confirm_fix, fix;
+logic confirm_over, over;
+logic confirm_check_over, check_over;
+
+// clear_row = {3th row clear?, 2th row clear?, 1th row clear?, 0th row clear?}
+logic clear_row [3:0];
+logic [1:0] clear_ptr;
+logic clear_en;
+logic [10:0] relevant_rows [3:0];
+logic [1:0] board_block_data [9:0];
+
+// clear_index = which row to clear (0, 1, 2, 3)
+logic [2:0] clear_index;
+
+// clear_phase = which iteration to clear (if even, fetch read data; if odd, write to data)
+logic [3:0] clear_phase;
+
+// shift_index = which row to shift downward (0, 1, 2, 3, 4, 5, ..., 18)
+logic [4:0] shift_index;
+// down_shift = how many rows to downshift the next row
+logic [4:0] down_shift;
+logic shift_inc, next_shift_inc;
+logic animate_en, next_animate_en;
+logic skip, next_skip;
+
+enum logic [5:0] {F_IDLE, F_POS_EDGE, F_COUNT, F_WIPE,
+   F_DROPi, F_DROP0, F_DROP1, F_DROP2, F_DROP3, 
+	F_EXECUTE0, F_MID0, F_EXECUTE1, F_MID1, F_EXECUTE2, F_MID2, F_EXECUTE3, 
+	F_CLEAR, F_STALL, F_STALL_READY, F_STALL_IDLE,
+	F_SHIFT_SELECTOR, F_SHIFT_EXECUTE, F_UPDATE,
+	F_FETCH, F_LOAD, F_GAMEOVER, F_STEADY} frame_state;
+
+// VSync Action state machine
+always_ff @ (posedge CLK) begin
+	if (RESET) begin
+		frame_state <= F_IDLE;
+		relevant_rows <= '{default:'0};
+		clear_row <= '{default:'0};
+		confirm_fix <= 0;
+		clear_index <= 0;
+		clear_phase <= 0;
+		clear_ptr <= 0;
+		shift_index <= 0;
+		down_shift <= 0;
+		shift_inc <= 0;
+		animate_en <= 0;
+		skip <= 0;
+		confirm_over <= 0;
+		confirm_check_over <= 0;
+	end
+	else begin
+		drop_en <= next_drop_en;
+		confirm_fix <= fix;
+		shift_inc <= next_shift_inc;
+		animate_en <= next_animate_en;
+		skip <= next_skip;
+		confirm_over <= over;
+		confirm_check_over <= check_over;
+		
+		if (!vs && frame_state == F_IDLE && !ASSERT_LEVEL) begin
+			frame_state <= F_POS_EDGE;
+			drop_en <= 0;
+			confirm_fix <= 0;
+			clear_index <= 0;
+			clear_phase <= 0;
+			clear_ptr <= 0;
+			relevant_rows <= '{default:'0};
+			clear_row <= '{default:'0};
+			shift_index <= 0;
+			down_shift <= 0;
+			shift_inc <= 0;
+			animate_en <= 0;
+			confirm_over <= 0;
+			confirm_check_over <= 0;
+			skip <= 0;
+		end
+		else if (frame_state == F_POS_EDGE) begin
+			frame_state <= F_COUNT;
+		end
+		else if (frame_state == F_COUNT) begin
+			if (next_drop_en) begin
+				frame_state <= F_WIPE;
+			end
+			else begin
+				frame_state <= F_STEADY;
+			end
+		end
+		else if (frame_state == F_WIPE) begin
+			frame_state <= F_DROPi;
+		end
+		else if (frame_state == F_DROPi) begin
+			frame_state <= F_DROP0;
+			relevant_rows[0] <= HW_ADDR;
+		end
+		else if (frame_state == F_DROP0) begin
+			frame_state <= F_DROP1;
+			relevant_rows[1] <= HW_ADDR;
+		end
+		else if (frame_state == F_DROP1) begin
+			frame_state <= F_DROP2;
+			relevant_rows[2] <= HW_ADDR;
+		end
+		else if (frame_state == F_DROP2) begin
+			frame_state <= F_DROP3;
+			relevant_rows[3] <= HW_ADDR;
+		end
+		else if (frame_state == F_DROP3) begin
+			frame_state <= F_EXECUTE0;
+		end
+		else if (frame_state == F_EXECUTE0) begin
+			frame_state <= F_MID0;
+			clear_row[0] <= clear_en;
+			if (clear_en) begin
+				clear_ptr <= 0;
+			end
+		end
+		else if (frame_state == F_MID0) begin
+			frame_state <= F_EXECUTE1;
+		end
+		else if (frame_state == F_EXECUTE1) begin
+			frame_state <= F_MID1;
+			clear_row[1] <= clear_en;
+			if (clear_en) begin
+				clear_ptr <= 1;
+			end
+		end
+		else if (frame_state == F_MID1) begin
+			frame_state <= F_EXECUTE2;
+		end
+		else if (frame_state == F_EXECUTE2) begin
+			frame_state <= F_MID2;
+			clear_row[2] <= clear_en;
+			if (clear_en) begin
+				clear_ptr <= 2;
+			end
+		end
+		else if (frame_state == F_MID2) begin
+			frame_state <= F_EXECUTE3;
+		end
+		else if (frame_state == F_EXECUTE3) begin
+			clear_row[3] <= clear_en;
+			if (clear_en) begin
+				clear_ptr <= 3;
+			end
+			
+			if (confirm_over) begin
+				frame_state <= F_GAMEOVER;
+			end
+			else if (!confirm_fix) begin
+				frame_state <= F_STEADY;
+			end
+			else if (clear_row[0] | clear_row[1] | clear_row[2] | clear_en) begin
+				frame_state <= F_UPDATE;
+			end
+			else begin
+				frame_state <= F_FETCH;	
+			end
+		end
+		else if (frame_state == F_UPDATE) begin
+			frame_state <= F_CLEAR;	// !!!!!!!!!!!!!!!!! should be clear
+		end
+		else if (!vs && frame_state == F_CLEAR) begin
+			if (clear_phase > 9) begin
+				shift_index <= WINDOW[22:18] + clear_ptr;
+				down_shift <= 0;
+				frame_state <= F_SHIFT_SELECTOR; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! change back to shift later
+			end
+			else if (clear_index == 4) begin
+				clear_phase <= clear_phase + 2;
+				clear_index <= 0;
+				frame_state <= F_STALL;	//should be stall
+			end
+			else if (clear_phase[0]) begin
+				clear_index <= clear_index + 1;
+				clear_phase <= clear_phase - 1;
+			end
+			else begin
+				clear_phase <= clear_phase + 1;
+			end
+		end
+		else if (!vs && frame_state == F_STALL) begin
+			if (animate_en) begin
+				frame_state <= F_CLEAR;
+				animate_en <= 0;
+			end
+			else begin
+				frame_state <= F_STALL_READY;
+			end
+		end
+		else if (!vs && frame_state == F_STALL_READY) begin
+			frame_state <= F_STALL_IDLE;
+		end
+		else if (frame_state == F_STALL_IDLE) begin
+			if (vs) begin
+				frame_state <= F_STALL;
+			end
+		end
+		else if (frame_state == F_SHIFT_SELECTOR) begin
+			if (next_shift_inc) begin
+				down_shift <= down_shift + 1;
+				shift_inc <= 0;
+			end
+			
+			if (shift_index == down_shift - 5'h2) begin	// Overflow
+				frame_state <= F_FETCH;
+			end
+			else begin
+				frame_state <= F_SHIFT_EXECUTE;
+			end
+		end
+		else if (frame_state == F_SHIFT_EXECUTE) begin
+			shift_index <= shift_index - 1;
+			frame_state <= F_SHIFT_SELECTOR;
+		end
+		else if (frame_state == F_UPDATE) begin
+			frame_state <= F_FETCH;
+		end
+		else if (frame_state ==  F_FETCH) begin
+			frame_state <= F_LOAD;
+		end
+		else if (frame_state == F_LOAD) begin
+			frame_state <= F_STEADY;
+		end
+		else if (frame_state == F_GAMEOVER) begin
+			if (ASSERT_LEVEL) begin
+				frame_state <= F_IDLE;
+			end
+		end
+		else if (vs && frame_state == F_STEADY) begin
+			frame_state <= F_IDLE;
+		end
+	end
+end
+
+always_comb begin // Decode electron beam position
+		addr = 45 * 16;
+		draw_board = 1'b0;
+		draw_piece = 1'b0;
+		draw_window = 1'b0;
+		board_block_template = BLACK;
+		board_col = 0;
+		board_row = 0;
+		game_over = 1'b0;
+		col = DrawX >> 4;
+		row = DrawY >> 4;
+		bit_index = ~DrawX[3:0];
+		piece_identifier = 5'h0;
+		piece_window_row = 2'b00;
+		piece_window_col = 2'b00;
+		pixel_x = 0;
+		HW_ADDR = 32'h0;
+		HW_READ = 1'b0;
+		HW_WRITE = 1'b0;
+		HW_WRITEDATA = 0;
+		next_drop_en = drop_en;
+		left_edge = 0;
+		right_edge = 0;
+		top_edge = 0;
+		bottom_edge = 0;
+		fix = confirm_fix;
+		LOCAL_WRITE = 0;
+		LOCAL_DATA = 0;
+		LOCAL_ADDR = 0;
+		clear_en = 0;
+		board_block_data = '{default:'0};
+		next_shift_inc = shift_inc;
+		next_animate_en = animate_en;
+		next_skip = skip;
+		next_transparent = transparent;
+		next_level_hovered = level_hovered;
+		over = confirm_over;
+		check_over = confirm_check_over;
+		
+		// Selecting level:
+		if (ASSERT_LEVEL) begin
+			if (level_state == L_POS_EDGE) begin
+				HW_ADDR = level_ctr_addr;
+			end
+			else if (level_state == L_COUNT) begin
+				HW_ADDR = level_ctr_addr;
+				HW_WRITEDATA = HW_READDATA + 1;
+				HW_WRITE = 1'b1;
+				
+				if (HW_WRITEDATA[1:0] == 0) begin
+					next_transparent = 1;
+				end
+				else begin
+					next_transparent = 0;
+				end
+			end
+			else if (level_state == L_HOVER) begin
+				HW_ADDR = level_hovered_addr;
+			end
+			else if (level_state == L_READ) begin
+				next_level_hovered = HW_READDATA;
+			end
+			else if ( (row == level_sel_row)
+				&& ( (col >= level_sel_left_col) && (col <= level_sel_right_col) ) ) begin
+				// "LEVEL"
+				unique case (col - level_sel_left_col)
+					0 : addr = start_L + DrawY[3:0];    // 'L'
+					1 : addr = start_E + DrawY[3:0];    // 'E'
+					2 : addr = start_V + DrawY[3:0];    // 'V'
+					3 : addr = start_E + DrawY[3:0];    // 'E'
+					4 : addr = start_L + DrawY[3:0];    // 'L'
+					default : addr = 45 * 16;
+				endcase
+			end
+			else if ( (row == lvl_zero_row) && (col == lvl_zero_col) ) begin
+				// "0"
+				addr = (transparent && level_hovered == 0) ? 45 * 16 : (0 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_one_row) && (col == lvl_one_col) ) begin
+				// "1"
+				addr = (transparent && level_hovered == 1) ? 45 * 16 : (1 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_two_row) && (col == lvl_two_col) ) begin
+				// "2"
+				addr = (transparent && level_hovered == 2) ? 45 * 16 : (2 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_three_row) && (col == lvl_three_col) ) begin
+				// "3"
+				addr = (transparent && level_hovered == 3) ? 45 * 16 : (3 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_four_row) && (col == lvl_four_col) ) begin
+				// "4"
+				addr = (transparent && level_hovered == 4) ? 45 * 16 : (4 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_five_row) && (col == lvl_five_col) ) begin
+				// "5"
+				addr = (transparent && level_hovered == 5) ? 45 * 16 : (5 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_six_row) && (col == lvl_six_col) ) begin
+				// "6"
+				addr = (transparent && level_hovered == 6) ? 45 * 16 : (6 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_seven_row) && (col == lvl_seven_col) ) begin
+				// "7"
+				addr = (transparent && level_hovered == 7) ? 45 * 16 : (7 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_eight_row) && (col == lvl_eight_col) ) begin
+				// "8"
+				addr = (transparent && level_hovered == 8) ? 45 * 16 : (8 * 16) + DrawY[3:0];
+			end
+			else if ( (row == lvl_nine_row) && (col == lvl_nine_col) ) begin
+				// "9"
+				addr = (transparent && level_hovered == 9) ? 45 * 16 : (9 * 16) + DrawY[3:0];
+			end
+			else begin
+				addr = 45 * 16;
+			end
+		end
+		// In-game:
+		else begin
+		if (frame_state == F_POS_EDGE) begin
+			HW_ADDR = frame_ctr_addr;	// Set address so that the next state can read its data
+		end
+		else if (frame_state == F_COUNT) begin
+			HW_ADDR = frame_ctr_addr;	// Read and increment the counter
+			HW_WRITEDATA = HW_READDATA + 1;
+			HW_WRITE = 1'b1;
+			next_drop_en = (HW_WRITEDATA >= DROP_INTERVAL) ? 1 : 0;
+		end
+		else if (frame_state == F_WIPE) begin
+			HW_ADDR = frame_ctr_addr;
+			HW_WRITEDATA = 0;
+			HW_WRITE = 1'b1;
+		end
+		else if (frame_state == F_DROPi) begin	// Fetch the first relevant row of data from the board
+			if (drop_en) begin
+				// Fetch data about the current piece
+				piece_identifier = WINDOW[4:0];
+				 
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				
+				// Check if at the board bottom
+				if ((map[0] || (map[1] && bottom_edge)) && WINDOW[17:13] == 19) begin
+					fix = 1;
+				end
+				else if (WINDOW[17:13] == 1) begin
+					check_over = 1;
+				end
+				
+				// 0 0 0 0
+				// 0 0 0 0
+				// 1 1 0 0
+				// 1 1 0 0
+				// Search through column and after finding the first '1', compute corresponding HW_ADDR
+				
+				if (map[0][3]) begin
+					//HW_ADDR = row_0_addr + 1 + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 4;
+					next_skip = 0;
+				end
+				else if (map[1][3]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 3;
+					next_skip = 0;
+				end
+				else if (map[2][3]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 1;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+					next_skip = 0;
+				end
+				else if (map[3][3]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 2;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+					next_skip = 0;
+				end
+				else begin
+					next_skip = 1;
+				end
+			end
+		end
+		else if (frame_state == F_DROP0) begin
+			// Check column 0's validity
+
+			if (drop_en) begin
+				if (!skip && (HW_READDATA[WINDOW[12:9] * 2] | HW_READDATA[(WINDOW[12:9] * 2) + 1])) begin
+					fix = 1;
+					if (confirm_check_over) begin
+						over = 1;
+					end
+				end
+				// Fetch data about the current piece
+				piece_identifier = WINDOW[4:0];
+				 
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				
+				// Check if at the board bottom
+				if ((map[0] || (map[1] && bottom_edge)) && WINDOW[17:13] == 19) begin
+					fix = 1;
+				end
+				
+				// 0 0 0 0
+				// 0 0 0 0
+				// 1 1 0 0
+				// 1 1 0 0
+				// Search through column and after finding the first '1', compute corresponding HW_ADDR
+				
+				if (map[0][2]) begin
+					//HW_ADDR = row_0_addr + 1 + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 4;
+					next_skip = 0;
+				end
+				else if (map[1][2]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 3;
+					next_skip = 0;
+				end
+				else if (map[2][2]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 1;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+					next_skip = 0;
+				end
+				else if (map[3][2]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 2;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+					next_skip = 0;
+				end
+				else begin
+					next_skip = 1;
+				end
+			end
+		end
+		else if (frame_state == F_DROP1) begin
+			// Check column 1's validity
+
+			if (drop_en) begin
+				if (!skip && (HW_READDATA[(WINDOW[12:9] + 1) * 2] | HW_READDATA[(WINDOW[12:9] + 1) * 2 + 1])) begin
+					fix = 1;
+					if (confirm_check_over) begin
+						over = 1;
+					end
+				end
+				// Fetch data about the current piece
+				piece_identifier = WINDOW[4:0];
+				 
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				
+				// Check if at the board bottom
+				if ((map[0] || (map[1] && bottom_edge)) && WINDOW[17:13] == 19) begin
+					fix = 1;
+				end
+				
+				// 0 0 0 0
+				// 0 0 0 0
+				// 1 1 0 0
+				// 1 1 0 0
+				// Search through column and after finding the first '1', compute corresponding HW_ADDR
+				
+				if (map[0][1]) begin
+					//HW_ADDR = row_0_addr + 1 + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 4;
+					next_skip = 0;
+				end
+				else if (map[1][1]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 3;
+					next_skip = 0;
+				end
+				else if (map[2][1]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 1;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+					next_skip = 0;
+				end
+				else if (map[3][1]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 2;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+					next_skip = 0;
+				end
+				else begin
+					next_skip = 1;
+				end
+			end
+		end
+		else if (frame_state == F_DROP2) begin
+			// Check column 2's validity
+
+			if (drop_en) begin
+				if (!skip && (HW_READDATA[(WINDOW[12:9] + 2) * 2] | HW_READDATA[((WINDOW[12:9] + 2) * 2) + 1])) begin
+					fix = 1;
+					if (confirm_check_over) begin
+						over = 1;
+					end
+				end
+				// Fetch data about the current piece
+				piece_identifier = WINDOW[4:0];
+				
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				
+				// Check if at the board bottom
+				if ((map[0] || (map[1] && bottom_edge)) && WINDOW[17:13] == 19) begin
+					fix = 1;
+				end
+				
+				// 0 0 0 0
+				// 0 0 0 0
+				// 1 1 0 0
+				// 1 1 0 0
+				// Search through column and after finding the first '1', compute corresponding HW_ADDR
+				
+				if (map[0][0]) begin
+					//HW_ADDR = row_0_addr + 1 + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 4;
+					next_skip = 0;
+				end
+				else if (map[1][0]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13];
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 3;
+					next_skip = 0;
+				end
+				else if (map[2][0]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 1;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+					next_skip = 0;
+				end
+				else if (map[3][0]) begin
+					//HW_ADDR = row_0_addr + WINDOW[17:13] - 2;
+					HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+					next_skip = 0;
+				end
+				else begin
+					next_skip = 1;
+				end
+			end
+		end
+		else if (frame_state == F_DROP3) begin
+			// Check column 3's validity
+
+			if (drop_en) begin
+				if (!skip && (HW_READDATA[(WINDOW[12:9] + 3) * 2] | HW_READDATA[((WINDOW[12:9] + 3) * 2) + 1])) begin
+					fix = 1;
+					if (confirm_check_over) begin
+						over = 1;
+					end
+				end
+				// Fetch data about the current piece
+				piece_identifier = WINDOW[4:0];
+				 
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				
+				// Check if at the board bottom
+				if ((map[0] || (map[1] && bottom_edge)) && WINDOW[17:13] == 19) begin
+					fix = 1;
+				end
+				
+				// 0 0 0 0
+				// 0 0 0 0
+				// 1 1 0 0
+				// 1 1 0 0
+				// Search through column and after finding the first '1', compute corresponding HW_ADDR
+				
+				// Go to the first row of data and fix the piece
+				
+				if (confirm_fix | fix) begin
+					HW_ADDR = row_0_addr + WINDOW[22:18];
+				end
+				else begin
+					HW_ADDR = relevant_rows[0];
+				end
+			end
+		end
+		else if (frame_state == F_EXECUTE0 && drop_en) begin
+			piece_identifier = WINDOW[4:0];
+				 
+			if (WINDOW[12:9] >= 7) begin
+				right_edge = 1;
+			end
+			else if (WINDOW[8:5] <= 2) begin
+				left_edge = 3 - WINDOW[8:5];
+			end
+				
+			if (WINDOW[17:13] <= 2) begin
+				top_edge = 3 - WINDOW[17:13];
+			end
+			else if (WINDOW[22:18] >= 17) begin
+				bottom_edge = 1;
+			end
+			
+			piece_window_row = 0;
+			
+			// Topmost row of the window is filled (probe map[3])
+			if (confirm_fix) begin
+				// The topmost row of the window is filled with potential blocks
+				// HW_READDATA is the topmost row board data
+				// HW_WRITEDATA is the updated topmost row board data
+				// With HW_WRITEDATA, determine if the row is cleared 
+				HW_ADDR = row_0_addr + WINDOW[22:18];
+				HW_WRITEDATA = HW_READDATA | (template_map << (WINDOW[12:9] * 2));
+				HW_WRITE = 1'b1;
+				
+				board_block_data = '{HW_WRITEDATA[19:18], HW_WRITEDATA[17:16], HW_WRITEDATA[15:14], HW_WRITEDATA[13:12], HW_WRITEDATA[11:10], HW_WRITEDATA[9:8], HW_WRITEDATA[7:6], HW_WRITEDATA[5:4], HW_WRITEDATA[3:2], HW_WRITEDATA[1:0]};
+				clear_en = board_block_data[0] && board_block_data[1] && board_block_data[2] && board_block_data[3] && board_block_data[4] && board_block_data[5] && board_block_data[6] && board_block_data[7] && board_block_data[8] && board_block_data[9]; 
+			end
+		end
+		else if (frame_state == F_MID0 && drop_en) begin
+			if (confirm_fix) begin
+				HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+			end
+			else if (drop_en) begin
+				HW_ADDR = relevant_rows[1];
+			end
+		end
+		else if (frame_state == F_EXECUTE1 && drop_en) begin
+			piece_identifier = WINDOW[4:0];
+				 
+			if (WINDOW[12:9] >= 7) begin
+				right_edge = 1;
+			end
+			else if (WINDOW[8:5] <= 2) begin
+				left_edge = 3 - WINDOW[8:5];
+			end
+				
+			if (WINDOW[17:13] <= 2) begin
+				top_edge = 3 - WINDOW[17:13];
+			end
+			else if (WINDOW[22:18] >= 17) begin
+				bottom_edge = 1;
+			end
+			
+			piece_window_row = 1;
+			
+			// Topmost row of the window is filled (probe map[3])
+			if (confirm_fix) begin	
+				HW_ADDR = row_0_addr + WINDOW[22:18] + 1;
+				HW_WRITEDATA = HW_READDATA | (template_map << (WINDOW[12:9] * 2));	// Fill in the board
+				HW_WRITE = 1'b1;
+				
+				// Check whether every single block of the row is non-black
+				board_block_data = '{HW_WRITEDATA[19:18], HW_WRITEDATA[17:16], HW_WRITEDATA[15:14], HW_WRITEDATA[13:12], HW_WRITEDATA[11:10], HW_WRITEDATA[9:8], HW_WRITEDATA[7:6], HW_WRITEDATA[5:4], HW_WRITEDATA[3:2], HW_WRITEDATA[1:0]};
+				clear_en = board_block_data[0] && board_block_data[1] && board_block_data[2] && board_block_data[3] && board_block_data[4] && board_block_data[5] && board_block_data[6] && board_block_data[7] && board_block_data[8] && board_block_data[9]; 
+			end
+		end
+		else if (frame_state == F_MID1 && drop_en) begin
+			if (confirm_fix) begin
+				HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+			end
+			else begin
+				HW_ADDR = relevant_rows[2];
+			end
+		end
+		else if (frame_state == F_EXECUTE2 && drop_en) begin
+			piece_identifier = WINDOW[4:0];
+				 
+			if (WINDOW[12:9] >= 7) begin
+				right_edge = 1;
+			end
+			else if (WINDOW[8:5] <= 2) begin
+				left_edge = 3 - WINDOW[8:5];
+			end
+				
+			if (WINDOW[17:13] <= 2) begin
+				top_edge = 3 - WINDOW[17:13];
+			end
+			else if (WINDOW[22:18] >= 17) begin
+				bottom_edge = 1;
+			end
+			
+			piece_window_row = 2;
+			
+			// Topmost row of the window is filled (probe map[3])
+			if (confirm_fix) begin	
+				HW_ADDR = row_0_addr + WINDOW[22:18] + 2;
+				HW_WRITEDATA = HW_READDATA | (template_map << (WINDOW[12:9] * 2));
+				HW_WRITE = 1'b1;
+				
+				board_block_data = '{HW_WRITEDATA[19:18], HW_WRITEDATA[17:16], HW_WRITEDATA[15:14], HW_WRITEDATA[13:12], HW_WRITEDATA[11:10], HW_WRITEDATA[9:8], HW_WRITEDATA[7:6], HW_WRITEDATA[5:4], HW_WRITEDATA[3:2], HW_WRITEDATA[1:0]};
+				clear_en = board_block_data[0] && board_block_data[1] && board_block_data[2] && board_block_data[3] && board_block_data[4] && board_block_data[5] && board_block_data[6] && board_block_data[7] && board_block_data[8] && board_block_data[9]; 
+			end
+		end
+		else if (frame_state == F_MID2 && drop_en) begin
+			if (confirm_fix) begin
+				HW_ADDR = row_0_addr + WINDOW[17:13];
+			end
+			else begin
+				HW_ADDR = relevant_rows[3];
+			end
+		end
+		else if (frame_state == F_EXECUTE3 && drop_en) begin
+			piece_identifier = WINDOW[4:0];
+				 
+			if (WINDOW[12:9] >= 7) begin
+				right_edge = 1;
+			end
+			else if (WINDOW[8:5] <= 2) begin
+				left_edge = 3 - WINDOW[8:5];
+			end
+				
+			if (WINDOW[17:13] <= 2) begin
+				top_edge = 3 - WINDOW[17:13];
+			end
+			else if (WINDOW[22:18] >= 17) begin
+				bottom_edge = 1;
+			end
+			
+			piece_window_row = 3;
+			
+			// Bottomost row
+			if (confirm_fix) begin	
+				HW_ADDR = row_0_addr + WINDOW[17:13];
+				HW_WRITEDATA = HW_READDATA | (template_map << (WINDOW[12:9] * 2));
+				HW_WRITE = 1'b1;
+				
+				board_block_data = '{HW_WRITEDATA[19:18], HW_WRITEDATA[17:16], HW_WRITEDATA[15:14], HW_WRITEDATA[13:12], HW_WRITEDATA[11:10], HW_WRITEDATA[9:8], HW_WRITEDATA[7:6], HW_WRITEDATA[5:4], HW_WRITEDATA[3:2], HW_WRITEDATA[1:0]};
+				clear_en = board_block_data[0] && board_block_data[1] && board_block_data[2] && board_block_data[3] && board_block_data[4] && board_block_data[5] && board_block_data[6] && board_block_data[7] && board_block_data[8] && board_block_data[9]; 
+			end
+			else begin	// Fetch pieces
+				LOCAL_ADDR = window_index;
+				// If the bottom of the window is greater than or equal to 3, increment both the top and bottom 
+				if ( ((WINDOW & 32'h0003E000) >= 32'h00006000) && ((WINDOW & 32'h007C0000) <= 32'h003C0000) ) begin
+					LOCAL_DATA = WINDOW + 32'h00042000;
+				end
+				// Edge cases for the window (don't want to overflow the edge values)
+				else if ( (WINDOW & 32'h0003E000) < 32'h00006000) begin
+					LOCAL_DATA = WINDOW + 32'h00002000;
+				end
+				else if ( (WINDOW & 32'h007C0000) > 32'h003C0000) begin
+					LOCAL_DATA = WINDOW + 32'h00040000;
+				end
+				LOCAL_WRITE = 1'b1;
+			end
+		end
+		else if (frame_state == F_UPDATE) begin
+			HW_ADDR = lines_cleared_addr;
+			HW_WRITEDATA = clear_row[0] + clear_row[1] + clear_row[2] + clear_row[3];
+			HW_WRITE = 1'b1;
+		end
+		else if (!vs && frame_state == F_CLEAR) begin
+			LOCAL_ADDR = window_index;
+			LOCAL_DATA = WINDOW | (1 << 23);
+			LOCAL_WRITE = 1'b1;
+			if (clear_row[clear_index]) begin
+				// On even phases, read the row data
+				if (!clear_phase[0]) begin
+					HW_ADDR = row_0_addr + WINDOW[22:18] + clear_index;
+				end
+				// On odd phases, write new row data using the old row data incrementally
+				else begin
+					HW_ADDR = row_0_addr + WINDOW[22:18] + clear_index;
+					HW_WRITEDATA = HW_READDATA & {10'h3FC << ((clear_phase >> 1) * 2), 10'h0FF >> ((clear_phase >> 1) * 2)};
+					HW_WRITE = 1'b1;
+				end
+			end
+		end
+		else if (!vs && frame_state == F_STALL) begin
+			// Assert the `clear` bit to prevent keycode input from the user.
+			LOCAL_ADDR = assertion_index;
+			LOCAL_DATA = 1;
+			LOCAL_WRITE = 1'b1;
+			
+			// Read data from the delay counter for the next clock cycle.
+			// Next state can be F_STALL_READY (important to get the data) or
+			// F_CLEAR (doesn't matter if we read as long as the clear phase # is even when we enter the state).
+			HW_ADDR = delay_ctr_addr;
+		end
+		else if (!vs && frame_state == F_STALL_READY) begin
+			HW_ADDR = delay_ctr_addr;	// Read and increment the counter
+			if (HW_READDATA[2:0] == 3'b111) begin
+				next_animate_en = 1;
+				HW_WRITEDATA = 0;
+			end
+			else begin
+				HW_WRITEDATA = HW_READDATA + 1;
+			end
+			HW_WRITE = 1'b1;
+		end
+		else if (frame_state == F_SHIFT_SELECTOR) begin
+			// Select the row above the bottommost cleared row.
+			if (shift_index != down_shift - 1) begin
+				HW_ADDR = row_0_addr + shift_index - 1;
+			
+				// Within the window means that instead of shifting, the rows now drop by one more row
+				if ( (shift_index >= WINDOW[22:18]) && clear_row[shift_index - WINDOW[22:18]]) begin
+					next_shift_inc = 1;
+				end
+				else begin
+					next_shift_inc = 0;
+				end
+			end
+		end
+		else if (frame_state == F_SHIFT_EXECUTE) begin
+			// Write to the row at the bottommost cleared row + some shift
+			HW_ADDR = row_0_addr + shift_index - 1 + down_shift;
+			// Special case when shift_index == 0 (overwrite with empty data).
+			if (shift_index == down_shift - 1) begin
+				HW_WRITEDATA = 0;
+			end
+			else begin
+				HW_WRITEDATA = HW_READDATA;
+			end
+			HW_WRITE = 1'b1;
+		end
+		else if (frame_state == F_FETCH) begin
+			HW_ADDR = next_addr;
+		end
+		else if (frame_state == F_LOAD) begin	// Assert to software to generate a new piece
+			LOCAL_ADDR = window_index;
+			LOCAL_DATA = ( HW_READDATA | (32'h00000006 << 5) | (32'h00000003 << 9) | (32'h00000001 << 13));
+			LOCAL_WRITE = 1'b1;
+			HW_ADDR = next_addr;
+			HW_WRITEDATA = ((random[15:0] % 3'h4) + (random[31:16] % 3'h4)) << 2;
+			HW_WRITE = 1'b1;
+		end
+		else if (!vs && frame_state == F_GAMEOVER) begin
+			LOCAL_ADDR = assertion_index;
+			LOCAL_DATA = ASSERTION | 32'h00000004;
+			LOCAL_WRITE = 1'b1;
+		end
+		// Static labels look-up table
+		else if ( (row == score_label_row)
+		&& ( (col >= score_label_left_col) && (col <= score_label_right_col) ) ) begin 
+		// "SCORE" 
+			unique case (col - score_label_left_col)
+				0 : addr = start_S + DrawY[3:0]; // 'S'
+				1 : addr = start_C + DrawY[3:0]; // 'C'
+				2 : addr = start_O + DrawY[3:0]; // 'O'
+				3 : addr = start_R + DrawY[3:0]; // 'R'
+				4 : addr = start_E + DrawY[3:0]; // 'E'
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == lines_label_row)
+		&& ( (col >= lines_label_left_col) && (col <= lines_label_right_col) ) ) begin
+		// "LINES-"
+			unique case (col - lines_label_left_col)
+				0 : addr = start_L + DrawY[3:0];    // 'L'
+				1 : addr = start_I + DrawY[3:0];    // 'I'
+				2 : addr = start_N + DrawY[3:0];    // 'N'
+				3 : addr = start_E + DrawY[3:0];    // 'E'
+				4 : addr = start_S + DrawY[3:0];    // 'S'
+				5 : addr = start_dash + DrawY[3:0]; // '-'
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == level_label_row)
+		&& ( (col >= level_label_left_col) && (col <= level_label_right_col) ) ) begin
+		// "LEVEL"
+			unique case (col - level_label_left_col)
+				0, 4 : addr = start_L + DrawY[3:0]; // 'L'
+				1, 3 : addr = start_E + DrawY[3:0]; // 'E'
+				2 : addr = start_V + DrawY[3:0]; 	  // 'V'
+				default : addr = 45 * 16;
+			endcase
+		end 
+		else if ( (row == next_label_row)
+		&& ( (col >= next_label_left_col) && (col <= next_label_right_col) ) ) begin
+		// "NEXT"
+			unique case (col - next_label_left_col)
+				0 : addr = start_N + DrawY[3:0]; // 'N'
+				1 : addr = start_E + DrawY[3:0]; // 'E'
+				2 : addr = start_X + DrawY[3:0]; // 'X'
+				3 : addr = start_T + DrawY[3:0]; // 'T'
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == score_val_row)
+		&& ( (col >= score_val_left_col) && (col <= score_val_right_col) ) ) begin
+		// 8-digit decimal number representing score value
+			HW_ADDR = score_addr;
+			unique case (col - score_val_left_col)
+				0 : addr = (HW_READDATA[31:28] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[27:24] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[23:20] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[19:16] * 16) + DrawY[3:0];
+				4 : addr = (HW_READDATA[15:12] * 16) + DrawY[3:0];
+				5 : addr = (HW_READDATA[11:8] * 16) + DrawY[3:0];
+				6 : addr = (HW_READDATA[7:4] * 16) + DrawY[3:0];
+				7 : addr = (HW_READDATA[3:0] * 16) + DrawY[3:0];
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == level_val_row)
+		&& ( (col >= level_val_left_col) && (col <= level_val_right_col) ) ) begin
+		// 4-digit decimal number representing level value
+			HW_ADDR = level_lines_addr;
+			HW_READ = 1'b1;
+			unique case (col - level_val_left_col)
+				0 : addr = (HW_READDATA[31:28] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[27:24] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[23:20] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[19:16] * 16) + DrawY[3:0];
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( (row == lines_val_row)
+		&& ( (col >= lines_val_left_col) && (col <= lines_val_right_col) ) ) begin
+		// 4-digit decimal number representing line count value
+			HW_ADDR = level_lines_addr;
+			HW_READ = 1'b1;
+			unique case (col - lines_val_left_col)
+				0 : addr = (HW_READDATA[15:12] * 16) + DrawY[3:0];
+				1 : addr = (HW_READDATA[11:8] * 16) + DrawY[3:0];
+				2 : addr = (HW_READDATA[7:4] * 16) + DrawY[3:0];
+				3 : addr = (HW_READDATA[3:0] * 16) + DrawY[3:0];
+				default : addr = 45 * 16;
+			endcase
+		end
+		else if ( ( (row >= board_top_row) && (row <= board_bottom_row) )
+		&& ( (col >= board_left_col) && (col <= board_right_col) ) ) begin
+		// 10 by 20 blocks representing the game field
+			draw_board = 1'b1;
+			pixel_x = DrawX[3:0];
+			board_row = row - board_top_row;
+			board_col = col - board_left_col;
+			HW_ADDR = (row_0_addr + board_row);
+			HW_READ = 1'b1;
+			game_over = (frame_state == F_GAMEOVER) ? 1 : HW_READDATA[20];
+			
+			if ( !WINDOW[23] && ( (board_row >= WINDOW[22:18]) && (board_row <= WINDOW[17:13]) ) 
+			&& ( (board_col >= WINDOW[12:9]) && (board_col <= WINDOW[8:5]) ) ) begin
+				piece_identifier = WINDOW[4:0];
+				if (WINDOW[12:9] >= 7) begin
+					right_edge = 1;
+				end
+				else if (WINDOW[8:5] <= 2) begin
+					left_edge = 3 - WINDOW[8:5];
+				end
+				
+				if (WINDOW[17:13] <= 2) begin
+					top_edge = 3 - WINDOW[17:13];
+				end
+				else if (WINDOW[22:18] >= 17) begin
+					bottom_edge = 1;
+				end
+				piece_window_row = board_row - WINDOW[22:18];//(WINDOW[17:13] <= 10) ? (3 - (WINDOW[17:13] - board_row)) : (board_row - WINDOW[22:18]);
+				piece_window_col = board_col - WINDOW[12:9];//(WINDOW[12:9] <= 5) ? (WINDOW[8:5] - board_col) : (3 - (board_col - WINDOW[12:9]));
+			end	
+			
+			if (piece_block_template == BLACK) begin
+				unique case (board_col)
+					0 : board_block_template = HW_READDATA[1:0];
+					1 : board_block_template = HW_READDATA[3:2];
+					2 : board_block_template = HW_READDATA[5:4];
+					3 : board_block_template = HW_READDATA[7:6];
+					4 : board_block_template = HW_READDATA[9:8];
+					5 : board_block_template = HW_READDATA[11:10];
+					6 : board_block_template = HW_READDATA[13:12];
+					7 : board_block_template = HW_READDATA[15:14];
+					8 : board_block_template = HW_READDATA[17:16];
+					9 : board_block_template = HW_READDATA[19:18];
+				endcase
+			end
+			else begin
+				draw_piece = 1'b1;
+			end
+		end
+		else if ( ( (row >= next_window_top_row) && (row <= next_window_bottom_row) )
+		&& ( (col >= next_window_left_col) && (col <= next_window_right_col) ) ) begin
+		// 4 by 3 blocks representing the next piece window (to center the piece, need to shift the columns if the piece needs it)
+			HW_ADDR = next_addr;
+			HW_READ = 1'b1;
+			draw_board = 1'b1;
+			draw_piece = 1'b1;
+			piece_identifier = HW_READDATA[4:0];
+			piece_window_row = ( (row - next_window_top_row) + 1);
+			unique case (piece_identifier[4:2])
+				3'b000, 3'b001 : 
+					// All pieces with symmetric initial orientations (no shift)
+					begin
+						piece_window_col = next_window_right_col - col;
+						pixel_x = DrawX[3:0];
+					end
+				default:
+					// All pieces with non-symmetric initial orientations (required shift)
+					begin
+						piece_window_col = ((DrawX + 8) >> 4) - next_window_left_col;
+						pixel_x = displacedDrawX[3:0];
+					end
+			endcase
+		end
+		else begin
+			addr = 45 * 16;
+		end
+		end
+		onoroff = data[bit_index];
+end
+
 always_ff @ (posedge pixel_clk) begin
-	if (RESET || !blank) // If don't need to display, then display black
-	begin
+	if (RESET || !blank) begin
 		r <= 4'h0;
 		g <= 4'h0;
 		b <= 4'h0;
 	end
-	else 	// If need to display, paint the current pixel
-	begin
-		r <= (onoroff) ? 4'b1111 : 4'h0 ;
-		g <= (onoroff) ? 4'b1111 : 4'h0 ;
-		b <= (onoroff) ? 4'b1111 : 4'h0 ;
+	else begin
+		if (draw_board) begin
+		// -> Pixel is colored based on block templates and color palettes.
+			unique case (block_color_index)
+				BLACK : begin
+					r <= 4'b0000;
+					g <= 4'b0000;
+					b <= 4'b0000;
+				end
+				DARK : begin
+					r <= PALETTE[12:9];
+					g <= PALETTE[8:5];
+					b <= PALETTE[4:1];
+				end
+				LIGHT : begin
+					r <= PALETTE[24:21];
+					g <= PALETTE[20:17];
+					b <= PALETTE[16:13];
+				end
+				WHITE : begin
+					r <= 4'b1111;
+					g <= 4'b1111;
+					b <= 4'b1111;
+				end
+			endcase
+		end
+		else begin
+		// -> Black and white coloring.
+			r <= (onoroff) ? 4'b1111 : 4'b0000;
+			g <= (onoroff) ? 4'b1111 : 4'b0000;
+			b <= (onoroff) ? 4'b1111 : 4'b0000;
+		end
 	end
 end
 endmodule

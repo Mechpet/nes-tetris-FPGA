@@ -27,7 +27,11 @@
 			vga_port_green                 : out   std_logic_vector(3 downto 0);                     -- green
 			vga_port_blue                  : out   std_logic_vector(3 downto 0);                     -- blue
 			vga_port_hs                    : out   std_logic;                                        -- hs
-			vga_port_vs                    : out   std_logic                                         -- vs
+			vga_port_vs                    : out   std_logic;                                        -- vs
+			i2c_serial_sda_in              : in    std_logic                     := 'X';             -- sda_in
+			i2c_serial_scl_in              : in    std_logic                     := 'X';             -- scl_in
+			i2c_serial_sda_oe              : out   std_logic;                                        -- sda_oe
+			i2c_serial_scl_oe              : out   std_logic                                         -- scl_oe
 		);
 	end component nes_tetris_soc;
 
@@ -60,6 +64,10 @@
 			vga_port_green                 => CONNECTED_TO_vga_port_green,                 --                        .green
 			vga_port_blue                  => CONNECTED_TO_vga_port_blue,                  --                        .blue
 			vga_port_hs                    => CONNECTED_TO_vga_port_hs,                    --                        .hs
-			vga_port_vs                    => CONNECTED_TO_vga_port_vs                     --                        .vs
+			vga_port_vs                    => CONNECTED_TO_vga_port_vs,                    --                        .vs
+			i2c_serial_sda_in              => CONNECTED_TO_i2c_serial_sda_in,              --              i2c_serial.sda_in
+			i2c_serial_scl_in              => CONNECTED_TO_i2c_serial_scl_in,              --                        .scl_in
+			i2c_serial_sda_oe              => CONNECTED_TO_i2c_serial_sda_oe,              --                        .sda_oe
+			i2c_serial_scl_oe              => CONNECTED_TO_i2c_serial_scl_oe               --                        .scl_oe
 		);
 

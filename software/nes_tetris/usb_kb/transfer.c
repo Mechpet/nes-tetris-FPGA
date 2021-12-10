@@ -196,7 +196,7 @@ BYTE XferInTransfer( BYTE addr/* not sure if it's necessary */, BYTE ep, WORD nb
  BYTE pktsize;
  WORD xfrlen = 0;
     MAXreg_wr( rHCTL, devtable[ addr ].epinfo[ ep ].rcvToggle );    //set toggle value
-    while( 1 ) { // use a 'return' to exit this loop
+    for(int i = 0; i < 50; i++) { // use a 'return' to exit this loop
         rcode = XferDispatchPkt( tokIN, ep );           //IN packet to EP-'endpoint'. Function takes care of NAKS.
         if( rcode ) {
             return( rcode );                            //should be 0, indicating ACK. Else return error code.

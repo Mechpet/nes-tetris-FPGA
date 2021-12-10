@@ -1,0 +1,18 @@
+Fitter Status : Successful - Fri Dec 10 08:32:21 2021
+Quartus Prime Version : 18.0.0 Build 614 04/24/2018 SJ Lite Edition
+Revision Name : SOC
+Top-level Entity Name : nes_tetris
+Family : MAX 10
+Device : 10M50DAF484C7G
+Timing Models : Final
+Total logic elements : 8,688 / 49,760 ( 17 % )
+    Total combinational functions : 7,435 / 49,760 ( 15 % )
+    Dedicated logic registers : 4,251 / 49,760 ( 9 % )
+Total registers : 4320
+Total pins : 141 / 360 ( 39 % )
+Total virtual pins : 0
+Total memory bits : 929,040 / 1,677,312 ( 55 % )
+Embedded Multiplier 9-bit elements : 0 / 288 ( 0 % )
+Total PLLs : 1 / 4 ( 25 % )
+UFM blocks : 0 / 1 ( 0 % )
+ADC blocks : 0 / 2 ( 0 % )

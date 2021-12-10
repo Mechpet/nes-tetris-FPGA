@@ -1,0 +1,141 @@
+/** block_memory:
+ * Contains read-only memory pertaining to the board's blocks.
+ * 1. Block template ROM index mappings:
+ *    00 - White~ -> Black
+ *    01 - Light~ -> Dark
+ *    10 - Dark~ -> Light
+ *    11 - Black -> White
+ *    Gameover - Gameover
+ * 2. Color palette index mappings:
+ *	   00 - Black
+ *    01 - Dark~
+ *    10 - Light~
+ *    11 - White
+ *	~ implies dynamic type of block (i.e. its color is non-constant).
+ *
+ *
+ * ex: The word 8'b00011011 can be separated in to four block template indices:
+ * 00|01|10|11
+ * [0] = 2'b00 : White block -> Black
+ * [1] = 2'b01 : Light block -> Dark
+ * [2] = 2'b10 : Dark block -> Light
+ * [3] = 2'b11 : Black block -> White
+ * where the 0th index refers to the left-most block on the VGA screen.
+ */
+
+import template_pkg::*;
+module block_memory ( input logic [1:0] block_template,
+							 input logic [3:0] pixel_x, pixel_y,
+							 input logic gameover,
+							 output logic [1:0] color_index);
+
+	parameter[0:63][31:0] TEMPLATE_ROM = {
+		// Code DARK (template 01)
+		32'b11110101010101010101010101010000, // 0
+		32'b11110101010101010101010101010000, // 1
+		32'b01011111111101010101010101010000, // 2
+		32'b01011111111101010101010101010000, // 3
+		32'b01011111010101010101010101010000, // 4
+		32'b01010101010101010101010101010000, // 5
+		32'b01010101010101010101010101010000, // 6
+		32'b01010101010101010101010101010000, // 7
+		32'b01010101010101010101010101010000, // 8
+		32'b01010101010101010101010101010000, // 9
+		32'b01010101010101010101010101010000, // 10
+		32'b01010101010101010101010101010000, // 11
+		32'b01010101010101010101010101010000, // 12
+		32'b01010101010101010101010101010000, // 13
+		32'b00000000000000000000000000000000, // 14
+		32'b00000000000000000000000000000000, // 15
+		// Code LIGHT (template 10)
+		32'b11111010101010101010101010100000, // 0
+		32'b11111010101010101010101010100000, // 1
+		32'b10101111111110101010101010100000, // 2
+		32'b10101111111110101010101010100000, // 3
+		32'b10101111101010101010101010100000, // 4
+		32'b10101010101010101010101010100000, // 5
+		32'b10101010101010101010101010100000, // 6
+		32'b10101010101010101010101010100000, // 7
+		32'b10101010101010101010101010100000, // 8
+		32'b10101010101010101010101010100000, // 9
+		32'b10101010101010101010101010100000, // 10
+		32'b10101010101010101010101010100000, // 11
+		32'b10101010101010101010101010100000, // 12
+		32'b10101010101010101010101010100000, // 13
+		32'b00000000000000000000000000000000, // 14
+		32'b00000000000000000000000000000000, // 15
+		// Code WHITE (template 11)
+		32'b11110101010101010101010101010000, // 0
+		32'b11110101010101010101010101010000, // 1
+		32'b01011111111111111111111101010000, // 2
+		32'b01011111111111111111111101010000, // 3
+		32'b01011111111111111111111101010000, // 4
+		32'b01011111111111111111111101010000, // 5
+		32'b01011111111111111111111101010000, // 6
+		32'b01011111111111111111111101010000, // 7
+		32'b01011111111111111111111101010000, // 8
+		32'b01011111111111111111111101010000, // 9
+		32'b01011111111111111111111101010000, // 10
+		32'b01011111111111111111111101010000, // 11
+		32'b01010101010101010101010101010000, // 12
+		32'b01010101010101010101010101010000, // 13
+		32'b00000000000000000000000000000000, // 14
+		32'b00000000000000000000000000000000, // 15
+		// Code GAMEOVER (assert @gameover input)
+		32'b10101010101010101010101010101010, // 0
+		32'b10101010101010101010101010101010, // 1
+		32'b10101010101010101010101010101010, // 2
+		32'b10101010101010101010101010101010, // 3
+		32'b11111111111111111111111111111111, // 4
+		32'b11111111111111111111111111111111, // 5
+		32'b11111111111111111111111111111111, // 6
+		32'b11111111111111111111111111111111, // 7
+		32'b11111111111111111111111111111111, // 8
+		32'b11111111111111111111111111111111, // 9
+		32'b01010101010101010101010101010101, // 10
+		32'b01010101010101010101010101010101, // 11
+		32'b01010101010101010101010101010101, // 12
+		32'b01010101010101010101010101010101, // 13
+		32'b00000000000000000000000000000000, // 14
+		32'b00000000000000000000000000000000  // 15
+	};
+	
+	logic [6:0] rom_addr;
+	logic [31:0] rom_data;
+	logic [1:0] rom_blocks [15:0];
+	
+	always_comb begin
+		rom_addr = ((block_template - 1) * 16) + pixel_y;
+		if (gameover == 1'b1) begin
+			// Override the rom_addr if the @gameover flag is asserted.
+			rom_addr = (3 * 16) + pixel_y;
+		end
+		else if (block_template == BLACK) begin
+			// For the constant block template, we want all black pixels.
+			rom_addr = 63;
+		end
+		
+		rom_data = TEMPLATE_ROM[rom_addr];
+		
+		// If @pixel_x is 0, the electron beam is at the left-most column of a block.
+		// Since the ROM is arranged with MSB denoting the left-most pixels, need to index appropriately.
+		unique case (15 - pixel_x)
+			0 : color_index = rom_data[1:0];
+			1 : color_index = rom_data[3:2];
+			2 : color_index = rom_data[5:4];
+			3 : color_index = rom_data[7:6];
+			4 : color_index = rom_data[9:8];
+			5 : color_index = rom_data[11:10];
+			6 : color_index = rom_data[13:12];
+			7 : color_index = rom_data[15:14];
+			8 : color_index = rom_data[17:16];
+			9 : color_index = rom_data[19:18];
+			10 : color_index = rom_data[21:20];
+			11 : color_index = rom_data[23:22];
+			12 : color_index = rom_data[25:24];
+			13 : color_index = rom_data[27:26];
+			14 : color_index = rom_data[29:28];
+			15 : color_index = rom_data[31:30];
+		endcase
+	end					 
+endmodule
